@@ -64,8 +64,9 @@ export default defineConfig({
       plugins: [],
     },
   },
-  root: path.resolve(__dirname, "client"),
-  envDir: path.resolve(__dirname), // Read .env from project root
+  root: __dirname, // Project root (where index.html is)
+  publicDir: path.resolve(__dirname, "client/public"), // Static assets
+  envDir: __dirname, // Read .env from project root
   build: {
     outDir: path.resolve(__dirname, "dist/public"),
     emptyOutDir: true,
