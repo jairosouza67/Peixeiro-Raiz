@@ -32,13 +32,26 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         mobileOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="p-6 flex flex-col h-full">
-          <div className="flex items-center gap-3 mb-10 text-primary-foreground">
-            <div className="bg-primary p-2 rounded-lg">
-              <Fish className="h-6 w-6 text-white" />
+          <div className="flex flex-col gap-6 mb-10">
+            <div className="relative h-24 w-full rounded-xl overflow-hidden shadow-lg border border-sidebar-border/50">
+              <img
+                src="/header-logo.png"
+                alt="Peixeiro Raiz Logo"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-3">
+                <span className="text-white font-heading font-bold text-lg leading-tight uppercase tracking-wider">Peixeiro Raiz</span>
+              </div>
             </div>
-            <div className="flex flex-col">
-              <span className="font-heading font-bold text-xl uppercase leading-none">Peixeiro</span>
-              <span className="text-xs uppercase tracking-[0.2em] opacity-70">Raiz</span>
+
+            <div className="flex items-center gap-3 text-primary-foreground px-2">
+              <div className="bg-primary p-2 rounded-lg shadow-md shadow-primary/20">
+                <Fish className="h-5 w-5 text-white" />
+              </div>
+              <div className="flex flex-col">
+                <span className="font-heading font-bold text-sm uppercase leading-none">Painel de</span>
+                <span className="text-xs uppercase tracking-[0.2em] opacity-70">Controle</span>
+              </div>
             </div>
           </div>
 
@@ -47,8 +60,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <Link key={item.href} href={item.href}>
                 <a className={cn(
                   "flex items-center gap-3 px-4 py-3 rounded-md transition-all duration-200 group",
-                  location === item.href 
-                    ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-lg font-medium" 
+                  location === item.href
+                    ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-lg font-medium"
                     : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 )}>
                   <item.icon className={cn("h-5 w-5", location === item.href ? "text-white" : "text-sidebar-foreground/50 group-hover:text-sidebar-foreground")} />
@@ -82,7 +95,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <main className="flex-1 overflow-auto bg-background/50 relative">
         {/* Background Pattern */}
         <div className="absolute inset-0 z-[-1] opacity-5 pointer-events-none bg-[radial-gradient(#0ea5e9_1px,transparent_1px)] [background-size:20px_20px]"></div>
-        
+
         <div className="container mx-auto max-w-6xl p-4 md:p-8 animate-in fade-in duration-500">
           {children}
         </div>
@@ -90,7 +103,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       {/* Overlay for mobile */}
       {mobileOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-40 md:hidden"
           onClick={() => setMobileOpen(false)}
         />

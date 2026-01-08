@@ -1,0 +1,318 @@
+{
+  "growthTable": [
+    {
+      "stage": "45% farelada",
+      "startWeight": 0.5,
+      "endWeight": 1.5,
+      "pvBase": 0.15,
+      "feedType": "Ração 45% 1 mm",
+      "feedings": 6
+    },
+    {
+      "stage": "45% farelada",
+      "startWeight": 1.5,
+      "endWeight": 3,
+      "pvBase": 0.13,
+      "feedType": "Ração 45% 1 mm",
+      "feedings": 6
+    },
+    {
+      "stage": "45% farelada",
+      "startWeight": 3,
+      "endWeight": 5,
+      "pvBase": 0.11,
+      "feedType": "Ração 45% 1 mm",
+      "feedings": 6
+    },
+    {
+      "stage": "40% 2mm",
+      "startWeight": 5,
+      "endWeight": 9,
+      "pvBase": 0.09,
+      "feedType": "Ração 40% 1,7 a 2 mm",
+      "feedings": 6
+    },
+    {
+      "stage": "40% 2mm",
+      "startWeight": 9,
+      "endWeight": 14,
+      "pvBase": 0.085,
+      "feedType": "Ração 40% 1,7 a 2 mm",
+      "feedings": 6
+    },
+    {
+      "stage": "40% 2mm",
+      "startWeight": 14,
+      "endWeight": 21,
+      "pvBase": 0.07,
+      "feedType": "Ração 40% 1,7 a 2 mm",
+      "feedings": 6
+    },
+    {
+      "stage": "40% 2mm",
+      "startWeight": 21,
+      "endWeight": 31,
+      "pvBase": 0.068,
+      "feedType": "Ração 40% 1,7 a 2 mm",
+      "feedings": 6
+    },
+    {
+      "stage": "35% 4mm",
+      "startWeight": 31,
+      "endWeight": 45,
+      "pvBase": 0.063,
+      "feedType": "Ração 35% 4 a 6 mm",
+      "feedings": 6
+    },
+    {
+      "stage": "35% 4mm",
+      "startWeight": 45,
+      "endWeight": 65,
+      "pvBase": 0.057999999999999996,
+      "feedType": "Ração 35% 4 a 6 mm",
+      "feedings": 6
+    },
+    {
+      "stage": "35% 4mm",
+      "startWeight": 65,
+      "endWeight": 90,
+      "pvBase": 0.055,
+      "feedType": "Ração 35% 4 a 6 mm",
+      "feedings": 6
+    },
+    {
+      "stage": "35% 4mm",
+      "startWeight": 90,
+      "endWeight": 120,
+      "pvBase": 0.052000000000000005,
+      "feedType": "Ração 35% 4 a 6 mm",
+      "feedings": 3
+    },
+    {
+      "stage": "35% 4mm",
+      "startWeight": 120,
+      "endWeight": 152,
+      "pvBase": 0.05,
+      "feedType": "Ração 35% 4 a 6 mm",
+      "feedings": 3
+    },
+    {
+      "stage": "32% C 6-8mm",
+      "startWeight": 152,
+      "endWeight": 190,
+      "pvBase": 0.043,
+      "feedType": "Ração 32% Crescimento 6 a 8 mm",
+      "feedings": 3
+    },
+    {
+      "stage": "32% C 6-8mm",
+      "startWeight": 190,
+      "endWeight": 231,
+      "pvBase": 0.036000000000000004,
+      "feedType": "Ração 32% Crescimento 6 a 8 mm",
+      "feedings": 3
+    },
+    {
+      "stage": "32% C 6-8mm",
+      "startWeight": 231,
+      "endWeight": 273,
+      "pvBase": 0.033,
+      "feedType": "Ração 32% Crescimento 6 a 8 mm",
+      "feedings": 3
+    },
+    {
+      "stage": "32% C 6-8mm",
+      "startWeight": 273,
+      "endWeight": 316,
+      "pvBase": 0.031,
+      "feedType": "Ração 32% Crescimento 6 a 8 mm",
+      "feedings": 3
+    },
+    {
+      "stage": "32% C 6-8mm",
+      "startWeight": 316,
+      "endWeight": 360,
+      "pvBase": 0.028999999999999998,
+      "feedType": "Ração 32% Crescimento 6 a 8 mm",
+      "feedings": 3
+    },
+    {
+      "stage": "32% C 6-8mm",
+      "startWeight": 360,
+      "endWeight": 405,
+      "pvBase": 0.027000000000000003,
+      "feedType": "Ração 32% Crescimento 6 a 8 mm",
+      "feedings": 3
+    },
+    {
+      "stage": "32% C 6-8mm",
+      "startWeight": 405,
+      "endWeight": 451,
+      "pvBase": 0.025,
+      "feedType": "Ração 32% Crescimento 6 a 8 mm",
+      "feedings": 3
+    },
+    {
+      "stage": "32% C 6-8mm",
+      "startWeight": 451,
+      "endWeight": 498,
+      "pvBase": 0.023,
+      "feedType": "Ração 32% Crescimento 6 a 8 mm",
+      "feedings": 3
+    },
+    {
+      "stage": "32% C 6-8mm",
+      "startWeight": 498,
+      "endWeight": 546,
+      "pvBase": 0.022000000000000002,
+      "feedType": "Ração 32% Crescimento 6 a 8 mm",
+      "feedings": 3
+    },
+    {
+      "stage": "32% C 6-8mm",
+      "startWeight": 546,
+      "endWeight": 595,
+      "pvBase": 0.02,
+      "feedType": "Ração 32% Crescimento 6 a 8 mm",
+      "feedings": 3
+    },
+    {
+      "stage": "32% C 6-8mm",
+      "startWeight": 595,
+      "endWeight": 645,
+      "pvBase": 0.019,
+      "feedType": "Ração 32% Crescimento 6 a 8 mm",
+      "feedings": 3
+    },
+    {
+      "stage": "32% C 6-8mm",
+      "startWeight": 645,
+      "endWeight": 696,
+      "pvBase": 0.018000000000000002,
+      "feedType": "Ração 32% Crescimento 6 a 8 mm",
+      "feedings": 3
+    },
+    {
+      "stage": "32% C 6-8mm",
+      "startWeight": 696,
+      "endWeight": 748,
+      "pvBase": 0.017,
+      "feedType": "Ração 32% Crescimento 6 a 8 mm",
+      "feedings": 3
+    },
+    {
+      "stage": "32% C 6-8mm",
+      "startWeight": 748,
+      "endWeight": 801,
+      "pvBase": 0.016,
+      "feedType": "Ração 32% Crescimento 6 a 8 mm",
+      "feedings": 3
+    },
+    {
+      "stage": "32% T 8-10mm",
+      "startWeight": 801,
+      "endWeight": 854,
+      "pvBase": 0.015,
+      "feedType": "Ração Terminação 32% 6 a 8 mm",
+      "feedings": 3
+    },
+    {
+      "stage": "32% T 8-10mm",
+      "startWeight": 854,
+      "endWeight": 908,
+      "pvBase": 0.015,
+      "feedType": "Ração Terminação 32% 6 a 8 mm",
+      "feedings": 3
+    },
+    {
+      "stage": "32% T 8-10mm",
+      "startWeight": 908,
+      "endWeight": 963,
+      "pvBase": 0.013999999999999999,
+      "feedType": "Ração Terminação 32% 6 a 8 mm",
+      "feedings": 3
+    },
+    {
+      "stage": "32% T 8-10mm",
+      "startWeight": 963,
+      "endWeight": 1019,
+      "pvBase": 0.013000000000000001,
+      "feedType": "Ração Terminação 32% 6 a 8 mm",
+      "feedings": 3
+    },
+    {
+      "stage": "32% T 8-10mm",
+      "startWeight": 1019,
+      "endWeight": 1076,
+      "pvBase": 0.012,
+      "feedType": "Ração Terminação 32% 6 a 8 mm",
+      "feedings": 3
+    },
+    {
+      "stage": "32% T 8-10mm",
+      "startWeight": 1076,
+      "endWeight": 1134,
+      "pvBase": 0.011,
+      "feedType": "Ração Terminação 32% 6 a 8 mm",
+      "feedings": 3
+    },
+    {
+      "stage": "32% T 8-10mm",
+      "startWeight": 1134,
+      "endWeight": 1194,
+      "pvBase": 0.011,
+      "feedType": "Ração Terminação 32% 6 a 8 mm",
+      "feedings": 3
+    }
+  ],
+  "tempTable": [
+    {
+      "temp": 21,
+      "factor": 0.8
+    },
+    {
+      "temp": 22,
+      "factor": 0.8
+    },
+    {
+      "temp": 23,
+      "factor": 0.85
+    },
+    {
+      "temp": 24,
+      "factor": 0.85
+    },
+    {
+      "temp": 25,
+      "factor": 0.9
+    },
+    {
+      "temp": 26,
+      "factor": 1
+    },
+    {
+      "temp": 27,
+      "factor": 1
+    },
+    {
+      "temp": 28,
+      "factor": 1
+    },
+    {
+      "temp": 29,
+      "factor": 1
+    },
+    {
+      "temp": 30,
+      "factor": 1
+    },
+    {
+      "temp": 31,
+      "factor": 1
+    },
+    {
+      "temp": 32,
+      "factor": 0.9
+    }
+  ]
+}

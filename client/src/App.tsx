@@ -9,25 +9,31 @@ import PaywallPage from "@/pages/paywall";
 import CalculatorPage from "@/pages/calculator";
 import HistoryPage from "@/pages/history";
 
+import { ProtectedRoute } from "./components/protected-route";
+
 function Router() {
   return (
     <Switch>
       <Route path="/" component={AuthPage} />
-      <Route path="/paywall" component={PaywallPage} />
-      <Route path="/calculator" component={CalculatorPage} />
-      <Route path="/history" component={HistoryPage} />
+      <ProtectedRoute path="/paywall" component={PaywallPage} />
+      <ProtectedRoute path="/calculator" component={CalculatorPage} />
+      <ProtectedRoute path="/history" component={HistoryPage} />
       <Route component={NotFound} />
     </Switch>
   );
 }
 
+import { AuthProvider } from "@/hooks/use-auth";
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

@@ -19,8 +19,9 @@ export interface WeeklyProjection {
 export interface SimulationOutput {
   biomass: number; // kg
   dailyFeed: number; // kg
-  dailyFeedings: number; // count
-  feedPerFeeding: number; // kg
+  dailyFeedings: number; // count (Tratos)
+  feedPerFeeding: number; // grams (Consumo por trato)
+  feedType: string; // Tipo de ração (ex: "Ração 40% 1,7 a 2 mm")
   dailyCost: number; // BRL
   fcr: number; // Feed Conversion Ratio (CA)
   projections: WeeklyProjection[];

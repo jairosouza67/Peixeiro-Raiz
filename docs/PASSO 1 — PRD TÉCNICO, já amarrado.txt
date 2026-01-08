@@ -1,0 +1,256 @@
+**PASSO 1 — PRD TÉCNICO**, já **amarrado ao motor fiel** que definimos.
+Depois disso, fecho com o **PASSO 3 — MVP**.
+
+---
+
+# 📄 PASSO 1 — PRD TÉCNICO (BASEADO NO MOTOR REAL)
+
+## 1. Visão do Produto
+
+**Nome (provisório):** Criador Inteligente
+**Tipo:** Web App + PWA
+**Objetivo:** Executar cálculos alimentares e projeções de crescimento de tilápias **idênticos à planilha original**, com controle de acesso via pagamento.
+
+---
+
+## 2. Escopo Funcional
+
+### 2.1 O que o sistema FAZ
+
+* Replica a lógica da planilha célula por célula
+* Calcula:
+
+  * Biomassa
+  * Ração diária
+  * Ração por trato
+  * Ganho de peso
+  * Projeção semanal
+  * Consumo acumulado
+  * Custo
+* Armazena simulações
+* Controla acesso por assinatura
+
+### 2.2 O que o sistema NÃO faz (por enquanto)
+
+* Sugestão automática de manejo
+* Alertas inteligentes
+* Integração com sensores
+* Multi-espécies
+
+---
+
+## 3. Requisitos Não Funcionais (críticos)
+
+* Cálculo determinístico
+* Precisão numérica compatível com Excel
+* Motor versionado
+* Resultado nunca muda sem mudança explícita de versão
+* Latência baixa (cálculo local)
+
+---
+
+## 4. Arquitetura
+
+### 4.1 Frontend
+
+* Next.js (App Router)
+* TypeScript
+* Tailwind + Shadcn UI
+* PWA habilitado
+* Cálculo executado no frontend (sem custo de infra)
+
+### 4.2 Backend
+
+* Supabase
+
+  * Auth
+  * Postgres
+  * RLS
+  * Edge Functions (webhooks)
+
+---
+
+## 5. Autenticação e Acesso
+
+### Fluxo
+
+1. Usuário cria conta
+2. Sistema cria registro em `subscriptions`
+3. Acesso inicial = **bloqueado**
+4. Pagamento confirmado → acesso liberado
+
+### Controle
+
+* Middleware no frontend:
+
+```ts
+if (!subscription.active) redirect('/paywall')
+```
+
+---
+
+## 6. Pagamento
+
+### Estratégia
+
+* Gateway externo (Stripe / Mercado Pago)
+* Webhook → Supabase Edge Function
+* Atualiza status da assinatura
+
+### Tabela `subscriptions`
+
+* id
+* user_id
+* status (`inactive | active | canceled`)
+* plan
+* expires_at
+* gateway_ref
+
+---
+
+## 7. Modelagem de Dados
+
+### 7.1 `feeding_simulations`
+
+```ts
+{
+  id,
+  user_id,
+  engine_version,
+  input_json,
+  output_json,
+  created_at
+}
+```
+
+### 7.2 `engine_versions`
+
+```ts
+{
+  version,
+  description,
+  created_at
+}
+```
+
+---
+
+## 8. Motor de Cálculo (Regra Oficial)
+
+* Código imutável por versão
+* Cada simulação grava:
+
+  * inputs
+  * outputs
+  * versão usada
+
+⚠️ **Nunca recalcular dados antigos com motor novo.**
+
+---
+
+## 9. Critérios de Aceite
+
+* Mesmo input → mesmo output da planilha
+* Diferença máxima: 0,001
+* Teste comparativo validado manualmente
+
+---
+
+# ✅ PASSO 1 CONCLUÍDO
+
+Você agora tem um **PRD técnico real**, não conceitual.
+Isso já é suficiente para qualquer ferramenta de IA dev trabalhar sem distorcer a lógica.
+
+---
+
+# 🖥️ PASSO 3 — MVP FUNCIONAL (EXECUTÁVEL)
+
+Agora fechamos com o **produto mínimo viável**, respeitando tudo acima.
+
+---
+
+## 1. Telas do MVP
+
+### Tela 1 — Login / Cadastro
+
+* Email
+* Senha
+* Supabase Auth
+
+---
+
+### Tela 2 — Paywall
+
+* Mensagem clara
+* Botão “Assinar”
+* Status da assinatura
+
+---
+
+### Tela 3 — Formulário de Cálculo
+
+Campos **idênticos à planilha**:
+
+* Peso médio inicial
+* Quantidade de peixes
+* Fase (se existir)
+* Temperatura (se usada)
+* Preço da ração
+* Número de semanas
+
+---
+
+### Tela 4 — Resultado Imediato
+
+* Biomassa
+* Ração/dia
+* Tratos/dia
+* Ração por trato
+* Custo diário
+
+---
+
+### Tela 5 — Projeção
+
+* Tabela semanal
+* Peso médio por semana
+* Consumo acumulado
+* Gráfico simples
+
+---
+
+## 2. Fluxo Técnico do MVP
+
+```
+Login
+  ↓
+Verifica assinatura
+  ↓
+Formulário
+  ↓
+Motor de cálculo (local)
+  ↓
+Exibe resultado
+  ↓
+Salva simulação
+```
+
+---
+
+## 3. O que torna esse MVP forte
+
+* Já é vendável
+* Já é confiável
+* Já substitui a planilha
+* Já cria dependência do usuário
+* Já permite escalar depois
+
+---
+
+# 🎯 Recomendação final (honesta)
+
+Você não está criando “um app”.
+Você está **empacotando um know-how validado**.
+
+
+
