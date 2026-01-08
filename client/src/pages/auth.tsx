@@ -37,7 +37,7 @@ export default function AuthPage() {
           title: "Bem-vindo de volta",
           description: "Login realizado com sucesso.",
         });
-        setLocation("/paywall");
+        setLocation("/calculator");
       }
     } catch (error: any) {
       toast({
