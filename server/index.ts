@@ -3,6 +3,8 @@ import cors from "cors";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import { logger } from "./lib/logger";
+import { requestLogger } from "./middleware/logger";
 
 const app = express();
 const httpServer = createServer(app);
@@ -49,6 +51,9 @@ app.use(
 
 app.use(express.urlencoded({ extended: false }));
 
+// Request logging middleware (must be after body parsers, before routes)
+app.use(requestLogger);
+
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
     hour: "numeric",
@@ -87,15 +92,26 @@ app.use((req, res, next) => {
 
   app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
-
-    log(
-      `${req.method} ${req.path} -> ${status} :: ${err.stack || err.message}`,
-      "express-error",
-    );
-
+  
+    // Use structured logger if available, otherwise fallback to console
+    const logMethod = status >= 500 ? "error" : "warn";
+    const logMessage = {
+      error: err.message,
+      stack: err.stack,
+      status,
+      method: req.method,
+      path: req.path,
+    };
+  
+    if (req.log) {
+      req.log[logMethod](logMessage, "Request error");
+    } else {
+      logger[logMethod](logMessage, "Request error (no req.log)");
+    }
+  
     const message =
       status >= 500 ? "Internal Server Error" : err.message || "Error";
-
+  
     if (!res.headersSent) {
       res.status(status).json({ message });
     }
@@ -123,7 +139,7 @@ app.use((req, res, next) => {
       reusePort: true,
     },
     () => {
-      log(`serving on port ${port}`);
+      logger.info({ port, env: process.env.NODE_ENV }, "Server started");
     },
   );
 })();

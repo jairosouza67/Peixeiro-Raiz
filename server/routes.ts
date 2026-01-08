@@ -27,8 +27,15 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-  // put application routes here
-  // prefix all routes with /api
+  // Health check endpoint (no auth, no rate limit)
+  app.get("/health", (req, res) => {
+    res.json({
+      status: "ok",
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      env: process.env.NODE_ENV,
+    });
+  });
 
   // Public route with rate limiting (no auth required)
   app.post("/api/calculate", calculationLimiter, (req, res, next) => {

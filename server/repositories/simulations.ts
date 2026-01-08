@@ -1,5 +1,6 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import type { SimulationInput, SimulationOutput } from "@shared/engine";
+import { logger } from "../lib/logger";
 
 // Backend Supabase client with service role key (not exposed to frontend)
 let supabaseAdmin: SupabaseClient | null = null;
@@ -37,6 +38,8 @@ export interface SaveSimulationParams {
 export async function saveSimulation(params: SaveSimulationParams) {
   const supabase = getSupabaseAdmin();
 
+  logger.debug({ userId: params.userId, engineVersion: params.engineVersion }, "Saving simulation");
+
   const { data, error } = await supabase.from("feeding_simulations").insert({
     user_id: params.userId,
     name: params.name,
@@ -46,14 +49,18 @@ export async function saveSimulation(params: SaveSimulationParams) {
   }).select().single();
 
   if (error) {
+    logger.error({ error: error.message, userId: params.userId }, "Failed to save simulation");
     throw new Error(`Failed to save simulation: ${error.message}`);
   }
 
+  logger.info({ simulationId: data.id, userId: params.userId }, "Simulation saved successfully");
   return data;
 }
 
 export async function getSimulationsByUser(userId: string) {
   const supabase = getSupabaseAdmin();
+
+  logger.debug({ userId }, "Fetching user simulations");
 
   const { data, error } = await supabase
     .from("feeding_simulations")
@@ -62,8 +69,10 @@ export async function getSimulationsByUser(userId: string) {
     .order("date", { ascending: false });
 
   if (error) {
+    logger.error({ error: error.message, userId }, "Failed to fetch simulations");
     throw new Error(`Failed to fetch simulations: ${error.message}`);
   }
 
+  logger.info({ count: data?.length || 0, userId }, "Simulations fetched successfully");
   return data;
 }
