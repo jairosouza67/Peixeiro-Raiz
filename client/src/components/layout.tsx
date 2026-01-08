@@ -57,16 +57,25 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
           <nav className="flex-1 space-y-2">
             {navItems.map((item) => (
-              <Link key={item.href} href={item.href}>
-                <a className={cn(
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
                   "flex items-center gap-3 px-4 py-3 rounded-md transition-all duration-200 group",
                   location === item.href
                     ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-lg font-medium"
-                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                )}>
-                  <item.icon className={cn("h-5 w-5", location === item.href ? "text-white" : "text-sidebar-foreground/50 group-hover:text-sidebar-foreground")} />
-                  {item.label}
-                </a>
+                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                )}
+              >
+                <item.icon
+                  className={cn(
+                    "h-5 w-5",
+                    location === item.href
+                      ? "text-white"
+                      : "text-sidebar-foreground/50 group-hover:text-sidebar-foreground",
+                  )}
+                />
+                {item.label}
               </Link>
             ))}
           </nav>
@@ -82,10 +91,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </div>
             </div>
             <Link href="/">
-              <a className="flex items-center gap-3 px-4 py-2 text-sm text-destructive hover:text-destructive/80 transition-colors">
+              <span className="flex items-center gap-3 px-4 py-2 text-sm text-destructive hover:text-destructive/80 transition-colors cursor-pointer">
                 <LogOut className="h-4 w-4" />
                 Sair
-              </a>
+              </span>
             </Link>
           </div>
         </div>

@@ -1,4 +1,3 @@
-import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -8,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { History, Search, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { authenticatedFetch } from "@/lib/api";
 
 export default function HistoryPage() {
   const { user } = useAuth();
@@ -16,22 +16,22 @@ export default function HistoryPage() {
   const { data: simulations, isLoading } = useQuery({
     queryKey: ["simulations", user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("feeding_simulations")
-        .select("*")
-        .eq("user_id", user?.id)
-        .order("date", { ascending: false });
+      if (!user?.id) return [];
 
-      if (error) {
-        console.error("Erro ao carregar histórico:", error);
+      const response = await authenticatedFetch(`/api/simulations/${user.id}`);
+
+      if (!response.ok) {
+        console.error("Erro ao carregar histórico:", response.status, await response.text());
         toast({
           variant: "destructive",
           title: "Erro ao carregar histórico",
           description: "Tente novamente em alguns instantes.",
         });
-        throw error;
+        throw new Error("Failed to fetch simulations");
       }
-      return data;
+
+      const data = (await response.json()) as { simulations: any[] };
+      return data.simulations;
     },
     enabled: !!user,
   });
@@ -58,7 +58,7 @@ export default function HistoryPage() {
               <div className="p-12 flex justify-center">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
-            ) : simulations?.length === 0 ? (
+            ) : !simulations || simulations.length === 0 ? (
               <div className="p-12 text-center text-muted-foreground">
                 <p>Nenhuma simulação encontrada.</p>
               </div>
@@ -88,7 +88,7 @@ export default function HistoryPage() {
                     </div>
                     <div>
                       <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
-                        v{item.engineVersion}
+                        v{item.engine_version}
                       </span>
                     </div>
                   </div>

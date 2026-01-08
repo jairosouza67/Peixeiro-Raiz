@@ -1,31 +1,6 @@
-export interface SimulationInput {
-  initialWeight: number; // grams
-  quantity: number; // count
-  phase: string; // e.g., "Engorda", "Berçário"
-  temperature: number; // Celsius
-  feedPrice: number; // BRL per kg
-  weeks: number; // duration
-}
+import type { SimulationInput, SimulationOutput, WeeklyProjection } from "@shared/engine";
 
-export interface WeeklyProjection {
-  week: number;
-  averageWeight: number; // grams
-  feedConsumption: number; // kg
-  accumulatedConsumption: number; // kg
-  biomass: number; // kg
-  cost: number; // BRL
-}
-
-export interface SimulationOutput {
-  biomass: number; // kg
-  dailyFeed: number; // kg
-  dailyFeedings: number; // count (Tratos)
-  feedPerFeeding: number; // grams (Consumo por trato)
-  feedType: string; // Tipo de ração (ex: "Ração 40% 1,7 a 2 mm")
-  dailyCost: number; // BRL
-  fcr: number; // Feed Conversion Ratio (CA)
-  projections: WeeklyProjection[];
-}
+export type { SimulationInput, SimulationOutput, WeeklyProjection } from "@shared/engine";
 
 export interface Simulation {
   id: string;

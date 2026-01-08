@@ -9,13 +9,13 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { calculateSimulation } from "@/lib/engine";
+// import { calculateSimulation } from "@/lib/engine";
 import { SimulationOutput } from "@/lib/types";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ArrowRight, Calculator as CalculatorIcon, Fish, Scale, Droplets } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
-import { supabase } from "@/lib/supabase";
+import { authenticatedFetch } from "@/lib/api";
 
 // Schema matching the spreadsheet inputs
 const formSchema = z.object({
@@ -44,41 +44,85 @@ export default function CalculatorPage() {
   const { user } = useAuth();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const output = calculateSimulation({
-      ...values,
-      phase: "Autodetect",
-    });
-    setResult(output);
-
-    // Salvamento automático no Supabase
-    if (user) {
-      const { error } = await supabase.from('feeding_simulations').insert({
-        user_id: user.id,
-        name: `Simulação ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}`,
-        input: values,
-        output: output,
-        engineVersion: "1.0.0"
+    try {
+      const response = await fetch("/api/calculate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          input: {
+            ...values,
+            phase: "Autodetect",
+          },
+        }),
       });
-      if (error) {
-        console.error("Erro ao salvar simulação:", error);
+
+      if (!response.ok) {
+        console.error("Erro ao calcular simulação via API:", response.status, await response.text());
         toast({
           variant: "destructive",
-          title: "Erro ao salvar simulação",
+          title: "Erro ao calcular simulação",
           description: "Tente novamente em alguns instantes.",
         });
+        return;
       }
-    }
 
-    toast({
-      title: "Cálculo Realizado",
-      description: "As projeções foram atualizadas com sucesso.",
-    });
+      const data = (await response.json()) as { output: SimulationOutput; engineVersion?: string };
+      const output = data.output;
+      const engineVersion = data.engineVersion ?? "1.0.0";
 
-    // Smooth scroll to results on mobile
-    if (window.innerWidth < 768) {
-      setTimeout(() => {
-        document.getElementById("results-section")?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
+      setResult(output);
+
+      // Salvamento automático via backend API (não mais direto ao Supabase)
+      if (user) {
+        try {
+          const saveResponse = await authenticatedFetch("/api/simulations", {
+            method: "POST",
+            body: JSON.stringify({
+              name: `Simulação ${new Date().toLocaleDateString("pt-BR")} ${new Date().toLocaleTimeString("pt-BR")}`,
+              input: values,
+              output: output,
+              engineVersion: engineVersion,
+            }),
+          });
+
+          if (!saveResponse.ok) {
+            console.error("Erro ao salvar simulação:", saveResponse.status, await saveResponse.text());
+            toast({
+              variant: "destructive",
+              title: "Erro ao salvar simulação",
+              description: "Tente novamente em alguns instantes.",
+            });
+          }
+        } catch (saveError) {
+          console.error("Erro ao salvar simulação:", saveError);
+          toast({
+            variant: "destructive",
+            title: "Erro ao salvar simulação",
+            description: "Tente novamente em alguns instantes.",
+          });
+        }
+      }
+
+      toast({
+        title: "Cálculo Realizado",
+        description: "As projeções foram atualizadas com sucesso.",
+      });
+
+      // Smooth scroll to results on mobile
+      if (window.innerWidth < 768) {
+        setTimeout(() => {
+          document.getElementById("results-section")?.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      }
+    } catch (error) {
+      console.error("Erro inesperado ao calcular simulação:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro inesperado",
+        description: "Não foi possível concluir o cálculo. Verifique sua conexão e tente novamente.",
+      });
     }
   }
 
