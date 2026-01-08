@@ -53,13 +53,20 @@ export default function CalculatorPage() {
     // Salvamento automático no Supabase
     if (user) {
       const { error } = await supabase.from('feeding_simulations').insert({
-        userId: user.id,
+        user_id: user.id,
         name: `Simulação ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}`,
         input: values,
         output: output,
         engineVersion: "1.0.0"
       });
-      if (error) console.error("Erro ao salvar:", error);
+      if (error) {
+        console.error("Erro ao salvar simulação:", error);
+        toast({
+          variant: "destructive",
+          title: "Erro ao salvar simulação",
+          description: "Tente novamente em alguns instantes.",
+        });
+      }
     }
 
     toast({

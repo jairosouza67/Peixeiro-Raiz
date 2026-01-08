@@ -7,9 +7,11 @@ import Layout from "@/components/layout";
 import { Card } from "@/components/ui/card";
 import { History, Search, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 
 export default function HistoryPage() {
   const { user } = useAuth();
+  const { toast } = useToast();
 
   const { data: simulations, isLoading } = useQuery({
     queryKey: ["simulations", user?.id],
@@ -17,10 +19,18 @@ export default function HistoryPage() {
       const { data, error } = await supabase
         .from("feeding_simulations")
         .select("*")
-        .eq("userId", user?.id)
+        .eq("user_id", user?.id)
         .order("date", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Erro ao carregar histórico:", error);
+        toast({
+          variant: "destructive",
+          title: "Erro ao carregar histórico",
+          description: "Tente novamente em alguns instantes.",
+        });
+        throw error;
+      }
       return data;
     },
     enabled: !!user,
