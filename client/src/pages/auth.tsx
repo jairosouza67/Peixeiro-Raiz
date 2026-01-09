@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Fish, Lock } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import bgImage from "@assets/generated_images/minimalist_deep_blue_water_surface_pattern.png";
 
@@ -18,6 +18,29 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+
+  // If already authenticated, skip login screen
+  // (important for PWA/refreshes where the route '/' still renders AuthPage)
+  useEffect(() => {
+    let cancelled = false;
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (cancelled) return;
+      if (session?.user) setLocation("/calculator");
+    }).catch(() => {
+      // ignore
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (cancelled) return;
+      if (session?.user) setLocation("/calculator");
+    });
+
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
+  }, [setLocation]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
