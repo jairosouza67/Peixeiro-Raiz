@@ -1,3 +1,4 @@
+import React from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -8,6 +9,8 @@ import { History, Search, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
+import HistoryCalculatorModal from "@/components/history-calculator-modal";
+import { Dialog } from "@/components/ui/dialog";
 
 export default function HistoryPage() {
   const { user } = useAuth();
@@ -39,6 +42,14 @@ export default function HistoryPage() {
     enabled: !!user,
   });
 
+  const [selected, setSelected] = React.useState<any | null>(null);
+  const [open, setOpen] = React.useState(false);
+
+  function openSimulation(sim: any) {
+    setSelected(sim);
+    setOpen(true);
+  }
+
   return (
     <Layout>
       <div className="space-y-6">
@@ -67,7 +78,7 @@ export default function HistoryPage() {
               </div>
             ) : (
               simulations?.map((item: any) => (
-                <div key={item.id} className="p-6 hover:bg-muted/5 transition-colors">
+                <div key={item.id} className="p-6 hover:bg-muted/5 transition-colors cursor-pointer" onClick={() => openSimulation(item)}>
                   <div className="mb-4">
                     <div className="rounded-md border border-border bg-slate-50 p-4 text-center">
                       <div className="text-xs text-muted-foreground">TIPO DE RAÇÃO RECOMENDADA</div>
@@ -97,6 +108,7 @@ export default function HistoryPage() {
             </div>
           </div>
         </Card>
+        <HistoryCalculatorModal open={open} onOpenChange={setOpen} simulation={selected} />
       </div>
     </Layout>
   );
