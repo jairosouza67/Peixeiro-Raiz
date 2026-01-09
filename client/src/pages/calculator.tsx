@@ -15,7 +15,7 @@ import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YA
 import { ArrowRight, Calculator as CalculatorIcon, Fish, Scale, Droplets } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
-import { authenticatedFetch } from "@/lib/api";
+import { supabase } from "@/lib/supabase";
 
 // Schema matching the spreadsheet inputs
 const formSchema = z.object({
@@ -45,18 +45,25 @@ export default function CalculatorPage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const response = await fetch("/api/calculate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          input: {
-            ...values,
-            phase: "Autodetect",
+      // Call Supabase Edge Function
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/calculate`,
+        {
+          method: "POST",
+          headers: {
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
           },
-        }),
-      });
+          body: JSON.stringify({
+            input: {
+              ...values,
+              phase: "Autodetect",
+            },
+          }),
+        }
+      );
 
       if (!response.ok) {
         console.error("Erro ao calcular simulação via API:", response.status, await response.text());
@@ -74,21 +81,21 @@ export default function CalculatorPage() {
 
       setResult(output);
 
-      // Salvamento automático via backend API (não mais direto ao Supabase)
+      // Save directly to Supabase
       if (user) {
         try {
-          const saveResponse = await authenticatedFetch("/api/simulations", {
-            method: "POST",
-            body: JSON.stringify({
+          const { error: saveError } = await supabase
+            .from('feeding_simulations')
+            .insert({
+              user_id: user.id,
               name: `Simulação ${new Date().toLocaleDateString("pt-BR")} ${new Date().toLocaleTimeString("pt-BR")}`,
               input: values,
               output: output,
-              engineVersion: engineVersion,
-            }),
-          });
+              engine_version: engineVersion,
+            });
 
-          if (!saveResponse.ok) {
-            console.error("Erro ao salvar simulação:", saveResponse.status, await saveResponse.text());
+          if (saveError) {
+            console.error("Erro ao salvar simulação:", saveError);
             toast({
               variant: "destructive",
               title: "Erro ao salvar simulação",

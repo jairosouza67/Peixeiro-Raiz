@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { History, Search, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { authenticatedFetch } from "@/lib/api";
+import { supabase } from "@/lib/supabase";
 
 export default function HistoryPage() {
   const { user } = useAuth();
@@ -18,10 +18,14 @@ export default function HistoryPage() {
     queryFn: async () => {
       if (!user?.id) return [];
 
-      const response = await authenticatedFetch(`/api/simulations/${user.id}`);
+      const { data, error } = await supabase
+        .from('feeding_simulations')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
 
-      if (!response.ok) {
-        console.error("Erro ao carregar histórico:", response.status, await response.text());
+      if (error) {
+        console.error("Erro ao carregar histórico:", error);
         toast({
           variant: "destructive",
           title: "Erro ao carregar histórico",
@@ -30,8 +34,7 @@ export default function HistoryPage() {
         throw new Error("Failed to fetch simulations");
       }
 
-      const data = (await response.json()) as { simulations: any[] };
-      return data.simulations;
+      return data || [];
     },
     enabled: !!user,
   });
