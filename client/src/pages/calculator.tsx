@@ -9,7 +9,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-// import { calculateSimulation } from "@/lib/engine";
+import { calculateSimulation } from "@/lib/engine";
 import { SimulationOutput } from "@/lib/types";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ArrowRight, Calculator as CalculatorIcon, Fish, Scale, Droplets } from "lucide-react";
@@ -45,6 +45,30 @@ export default function CalculatorPage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
+      // OFFLINE MODE: run calculation locally (no API, no Supabase write)
+      if (!navigator.onLine) {
+        const output = calculateSimulation({
+          ...values,
+          // calculator form does not ask for phase; keep consistent with API payload
+          phase: "Autodetect",
+        } as any);
+
+        setResult(output);
+
+        toast({
+          title: "Calculado offline",
+          description: "Sem internet: o cálculo foi feito no aparelho e não foi salvo no histórico.",
+        });
+
+        if (window.innerWidth < 768) {
+          setTimeout(() => {
+            document.getElementById("results-section")?.scrollIntoView({ behavior: "smooth" });
+          }, 100);
+        }
+
+        return;
+      }
+
       // Call Supabase Edge Function
       const { data: { session } } = await supabase.auth.getSession();
       
