@@ -3,10 +3,33 @@ import { Fish, Calculator, History, LogOut, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
+
+function getInitials(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return "??";
+
+  const parts = trimmed
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .split(/\s+/)
+    .filter(Boolean);
+
+  if (parts.length === 0) return "??";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[1][0]).toUpperCase();
+}
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, signOut } = useAuth();
+
+  const displayName =
+    (user?.user_metadata as any)?.full_name ||
+    (user?.user_metadata as any)?.name ||
+    user?.email?.split("@")[0] ||
+    "Usuário";
+  const initials = getInitials(displayName);
 
   const navItems = [
     { label: "Calculadora", icon: Calculator, href: "/calculator" },
@@ -83,19 +106,24 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <div className="mt-auto pt-6 border-t border-sidebar-border">
             <div className="flex items-center gap-3 px-4 py-3 rounded-md bg-sidebar-accent/50 mb-4">
               <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs font-bold border border-primary/20">
-                JD
+                {initials}
               </div>
               <div className="flex flex-col overflow-hidden">
-                <span className="text-sm font-medium truncate">João Do Peixe</span>
-                <span className="text-xs text-muted-foreground truncate">Plano Pro</span>
+                <span className="text-sm font-medium truncate">{displayName}</span>
+                <span className="text-xs text-muted-foreground truncate">{user?.email ?? ""}</span>
               </div>
             </div>
-            <Link href="/">
-              <span className="flex items-center gap-3 px-4 py-2 text-sm text-destructive hover:text-destructive/80 transition-colors cursor-pointer">
-                <LogOut className="h-4 w-4" />
-                Sair
-              </span>
-            </Link>
+            <button
+              type="button"
+              onClick={async () => {
+                await signOut();
+                setLocation("/");
+              }}
+              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-destructive hover:text-destructive/80 transition-colors cursor-pointer bg-transparent border-none text-left"
+            >
+              <LogOut className="h-4 w-4" />
+              Sair
+            </button>
           </div>
         </div>
       </aside>

@@ -13,6 +13,7 @@ import { supabase } from "@/lib/supabase";
 export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [, setLocation] = useLocation();
@@ -24,7 +25,20 @@ export default function AuthPage() {
 
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({ email, password });
+        const trimmedName = fullName.trim();
+        if (!trimmedName) {
+          throw new Error("Informe seu nome para criar a conta.");
+        }
+
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              full_name: trimmedName,
+            },
+          },
+        });
         if (error) throw error;
         toast({
           title: "Conta criada",
@@ -97,6 +111,21 @@ export default function AuthPage() {
           </div>
 
           <form onSubmit={handleAuth} className="space-y-6">
+            {isSignUp && (
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Nome</Label>
+                <Input
+                  id="fullName"
+                  type="text"
+                  placeholder="Seu nome"
+                  required
+                  className="h-12 bg-card"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                />
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -142,7 +171,10 @@ export default function AuthPage() {
           <div className="text-center text-sm">
             {isSignUp ? "Já tem uma conta?" : "Não tem uma conta?"}{" "}
             <button
-              onClick={() => setIsSignUp(!isSignUp)}
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setFullName("");
+              }}
               className="font-medium text-primary hover:underline bg-transparent border-none p-0"
             >
               {isSignUp ? "Entrar agora" : "Criar conta gratuita"}
