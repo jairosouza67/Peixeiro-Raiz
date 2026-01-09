@@ -38,10 +38,7 @@ export default function HistoryCalculatorModal({ open, onOpenChange, simulation 
                   <div className="text-xs text-muted-foreground">Temperatura (°C)</div>
                   <div className="font-medium">{input.temperature ?? "-"}</div>
                 </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Preço da ração (R$/kg)</div>
-                  <div className="font-medium">{input.feedPrice ?? "-"}</div>
-                </div>
+                
               </div>
             </CardContent>
           </Card>
