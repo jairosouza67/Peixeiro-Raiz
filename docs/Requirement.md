@@ -1,205 +1,185 @@
-# Peixeiro Raiz - Documento de Requisitos do Produto
+# Peixeiro Raiz — Requisitos (Atual do Projeto)
 
-## 1. Visão Geral do Produto
+Este documento descreve **o que existe hoje no repositório** (estado real do projeto) e o que está previsto como evolução.
 
-### 1.1 Nome do Aplicativo
+## 1. Visão Geral
+
+### 1.1 Nome
 Peixeiro Raiz
 
-### 1.2 Descrição do Aplicativo
-Peixeiro Raiz é uma aplicação web (Web App + PWA) que executa cálculos alimentares e projeções de crescimento de tilápias, replicando a lógica da planilha original célula por célula. O sistema oferece controle de acesso via assinatura paga e permite aos usuários realizar simulações precisas de manejo alimentar.
+### 1.2 Descrição
+Aplicação web (Web App + PWA) para simulação de manejo alimentar e projeção de crescimento de tilápias, com motor de cálculo determinístico (versão 1.0.0) e histórico de simulações por usuário.
 
-### 1.3 Objetivo\nSubstituir a planilha Excel original por uma solução web confiável, determinística e escalável, mantendo precisão numérica idêntica aos cálculos originais.
-\n## 2. Funcionalidades Principais
+### 1.3 Objetivo
+Substituir a planilha Excel original por uma solução web confiável, versionada e reprodutível, mantendo consistência numérica com a lógica importada.
 
-### 2.1 Sistema de Autenticação
-- Cadastro de usuário com email e senha
-- Login via Supabase Auth
-- Controle de sessão\n
-### 2.2 Sistema de Assinatura\n- Registro automático em subscriptions após cadastro
-- Status inicial: bloqueado
-- Integração com gateway de pagamento (Stripe/Mercado Pago)
-- Webhook para atualização de status
-- Middleware de verificação de acesso
+## 2. Stack e Arquitetura (Implementado)
+
+### 2.1 Frontend
+- Framework: **Vite + React (TypeScript)**
+- Roteamento: **wouter**
+- UI: **Tailwind + shadcn/ui (Radix)**
+- Estado/requests: **@tanstack/react-query**
+- PWA: **vite-plugin-pwa**
+
+### 2.2 Backend / Serviços
+- Autenticação: **Supabase Auth** (client-side)
+- Banco: **PostgreSQL (Supabase)**
+- Funções: **Supabase Edge Functions** (cálculo remoto quando online)
+- Servidor Node (repo): **Express** com rotas (health, cálculo, histórico) + middleware de auth via JWT Supabase (utilizável como alternativa/apoio)
 
 ### 2.3 Motor de Cálculo
-- Cálculo de biomassa\n- Cálculo de ração diária
-- Cálculo de ração por trato
-- Cálculo de ganho de peso
-- Projeção semanal de crescimento
-- Consumo acumulado de ração
-- Cálculo de custo\n- Versionamento do motor de cálculo
-- Execução local no frontend
+- Localização: `shared/engine.ts`
+- Versão: `ENGINE_VERSION = 1.0.0`
+- Uso:
+	- Frontend calcula **offline** localmente.
+	- Online, o cálculo é feito via **Edge Function** (`/functions/v1/calculate`) e o resultado é salvo no Supabase.
 
-### 2.4 Formulário de Entrada
-Campos de entrada idênticos à planilha original:
-- Peso médio inicial
-- Quantidade de peixes
-- Fase (se aplicável)
-- Temperatura (se utilizada)
-- Preço da ração
-- Número de semanas para projeção
+## 3. Funcionalidades (Estado Atual)
 
-### 2.5 Exibição de Resultados
-**Resultado Imediato:**
-- Biomassa atual
-- Ração por dia
-- Número de tratos por dia
-- Ração por trato
-- Custo diário
+### 3.1 Autenticação (Implementado)
+- Login/cadastro via Supabase Auth.
+- Contexto de sessão no frontend (`client/src/hooks/use-auth.tsx`).
+- Sincronização de um registro em `users` via `upsert` após login (perfil básico: `email`, `full_name`).
 
-**Projeção Semanal:**
-- Tabela com dados semanais
-- Peso médio por semana
-- Consumo acumulado
-- Gráfico de evolução
+### 3.2 Controle de Acesso / Assinatura (Parcial)
+- Existe tabela `subscriptions` e conceito de status (`blocked`, `active`).
+- **Ainda não está implementado no frontend** um paywall baseado em `subscriptions`.
+- Integração com gateway (Stripe/Mercado Pago) e webhooks: **previsto**, não concluído.
 
-### 2.6 Armazenamento de Simulações\n- Salvamento automático de cada simulação
-- Registro de inputs, outputs e versão do motor utilizada
-- Histórico de simulações por usuário
+### 3.3 Calculadora de Manejo (Implementado)
+- Tela protegida: `/calculator`.
+- Inputs atuais do formulário:
+	- `initialWeight` (g)
+	- `quantity` (un)
+	- `temperature` (°C)
+	- `feedPrice` (R$/kg)
+	- `weeks` (semanas)
+- Campo `phase` existe no contrato do motor e é enviado como "Autodetect" (não é input do formulário hoje).
 
-## 3. Estrutura de Dados
+### 3.4 Resultados (Implementado parcialmente)
+- Exibição imediata (na UI atual):
+	- `feedType` (Tipo de ração)
+	- `feedPerFeeding` (g por trato)
+	- `dailyFeedings` (tratos/dia)
+- O motor também retorna (já disponível no output):
+	- `biomass`, `dailyFeed`, `dailyCost`, `fcr`, `projections[]`
+- Existe base para gráficos (Recharts importado), mas a UI atual prioriza as métricas principais.
 
-### 3.1 Tabela: subscriptions
-- id: identificador único
-- user_id: referência ao usuário
-- status: inactive | active | canceled
-- plan: plano de assinatura
-- expires_at: data de expiração
-- gateway_ref: referência do gateway de pagamento
+### 3.5 Histórico de Simulações (Implementado)
+- Tela protegida: `/history`.
+- Busca as simulações do Supabase por `user_id`.
+- Permite abrir detalhes via modal.
+- Permite **deletar** simulações.
 
-### 3.2 Tabela: feeding_simulations
-- id: identificador único
-- user_id: referência ao usuário\n- engine_version: versão do motor utilizada
-- input_json: dados de entrada
-- output_json: resultados calculados
-- created_at: data de criação
+### 3.6 Persistência (Implementado)
+- Ao calcular **online**:
+	- Chama a Edge Function de cálculo.
+	- Salva em `feeding_simulations` com `input`, `output`, `engine_version`.
+- Ao calcular **offline**:
+	- Calcula localmente.
+	- **Não salva** no Supabase.
 
-### 3.3 Tabela: engine_versions
-- version: número da versão
-- description: descrição das alterações
-- created_at: data de criação
+## 4. Motor de Cálculo — Regras (Implementado)
 
-## 4. Fluxo de Usuário
+### 4.1 Entrada (Contrato)
+Tipo `SimulationInput`:
+- `initialWeight` (g)
+- `quantity` (un)
+- `phase` (string, informativo hoje)
+- `temperature` (°C)
+- `feedPrice` (R$/kg)
+- `weeks` (1..52)
 
-### 4.1 Fluxo de Acesso
-1. Usuário acessa a aplicação
-2. Realiza cadastro ou login
-3. Sistema verifica status da assinatura
-4. Se inativo: redireciona para paywall
-5. Se ativo: acessa formulário de cálculo
+### 4.2 Saída (Contrato)
+Tipo `SimulationOutput`:
+- `feedType`, `feedPerFeeding` (g), `dailyFeedings`
+- `biomass` (kg), `dailyFeed` (kg), `dailyCost` (R$), `fcr`
+- `projections[]` semanais com consumo e custo
 
-### 4.2 Fluxo de Cálculo
-1. Usuário preenche formulário com dados dos peixes
-2. Clica em calcular
-3. Motor executa cálculos localmente
-4. Sistema exibe resultados imediatos
-5. Sistema exibe projeção semanal com tabela e gráfico
-6. Simulação é salva automaticamente no banco de dados
+### 4.3 Determinismo e Versionamento
+- O motor é puro e versionado (`ENGINE_VERSION`).
+- Cada simulação salva deve registrar a versão do motor usada.
 
-### 4.3 Fluxo de Pagamento
-1. Usuário clica em Assinar
-2. Redirecionado para gateway de pagamento
-3. Realiza pagamento\n4. Gateway envia webhook para Supabase Edge Function
-5. Sistema atualiza status da assinatura para active
-6. Usuário obtém acesso completo\n
-## 5. Requisitos Técnicos
+## 5. Estrutura de Dados (No repositório)
 
-### 5.1 Frontend
-- Framework: Next.js (App Router)\n- Linguagem: TypeScript
-- Estilização: Tailwind CSS + Shadcn UI
-- PWA habilitado
-- Cálculos executados no frontend
-\n### 5.2 Backend
-- Plataforma: Supabase\n- Autenticação: Supabase Auth
-- Banco de dados: PostgreSQL
-- Segurança: Row Level Security (RLS)
-- Webhooks: Supabase Edge Functions
-\n### 5.3 Requisitos de Precisão
-- Cálculo determinístico
-- Precisão numérica compatível com Excel
-- Diferença máxima permitida: 0,001
-- Motor versionado e imutável
-- Resultados nunca mudam sem mudança explícita de versão
-\n### 5.4 Requisitos de Performance
-- Latência baixa (cálculo local)
-- Resposta imediata ao usuário
-- Sem custo de infraestrutura para cálculos
+> Observação: no código existe o schema Drizzle em `shared/schema.ts`, mas o app também acessa tabelas diretamente via Supabase.
 
-## 6. Telas do MVP
+### 5.1 `users`
+- `id` (uuid, pk)
+- `email` (text, unique, not null)
+- `full_name` (text, null)
+- `created_at` (timestamp)
 
-### Tela 1: Login/Cadastro
-- Campos de email e senha
-- Botão de login
-- Link para cadastro
-- Integração com Supabase Auth\n
-### Tela 2: Paywall
-- Mensagem clara sobre necessidade de assinatura
-- Botão Assinar
-- Exibição do status atual da assinatura
+### 5.2 `feeding_simulations`
+- `id` (uuid, pk)
+- `user_id` (uuid, fk users)
+- `date` (timestamp)
+- `name` (text)
+- `input` (jsonb)
+- `output` (jsonb)
+- `engine_version` (text)
 
-### Tela 3: Formulário de Cálculo
-- Campos de entrada conforme planilha original
-- Validação de dados
-- Botão de calcular
-\n### Tela 4: Resultado Imediato
-- Exibição de biomassa
-- Ração por dia
-- Tratos por dia
-- Ração por trato
-- Custo diário
+### 5.3 `subscriptions`
+- `id` (uuid, pk)
+- `user_id` (uuid, fk users)
+- `status` (text: `blocked` | `active`)
+- `plan_id` (text, null)
+- `trial_end` (timestamp, null)
+- `updated_at` (timestamp)
 
-### Tela 5: Projeção Semanal
-- Tabela com dados semanais
-- Peso médio por semana
-- Consumo acumulado
-- Gráfico de evolução
+### 5.4 `engine_versions`
+- `version` (text, pk)
+- `logic_hash` (text)
+- `status` (text)
+- `created_at` (timestamp)
 
-## 7. Regras de Negócio
+## 6. Telas e Rotas (Implementado)
 
-### 7.1 Controle de Acesso
-- Acesso inicial sempre bloqueado após cadastro
-- Liberação apenas após confirmação de pagamento
-- Verificação de status em cada acesso
+### 6.1 Rotas do Frontend
+- `/` → Auth (login/cadastro)
+- `/calculator` → Calculadora (protegida)
+- `/history` → Histórico (protegida)
 
-### 7.2 Motor de Cálculo
-- Código imutável por versão
-- Cada simulação registra a versão utilizada
-- Proibido recalcular dados antigos com motor novo
-- Garantia de reprodutibilidade dos resultados
+### 6.2 Rotas do Servidor Node (no repo)
+- `GET /health` → status
+- `POST /api/calculate` → cálculo (rate limited)
+- `POST /api/simulations` → salvar simulação (autenticada)
+- `GET /api/simulations/:userId` → listar simulações do usuário (autenticada)
 
-### 7.3 Armazenamento\n- Todas as simulações são salvas\n- Inputs e outputs preservados
-- Versionamento obrigatório
-\n## 8. Critérios de Aceite
-\n### 8.1 Precisão de Cálculo
-- Mesmo input deve gerar mesmo output da planilha original
-- Diferença máxima tolerada: 0,001
-- Teste comparativo validado manualmente
+> Nota: o fluxo principal atual do frontend usa **Edge Function** para calcular e **Supabase** para salvar/consultar; as rotas Express estão disponíveis como alternativa.
 
-### 8.2 Funcionalidade
-- Sistema de autenticação operacional
-- Controle de assinatura funcional
-- Cálculos executados corretamente
-- Resultados exibidos adequadamente
-- Simulações salvas com sucesso
+## 7. Regras de Negócio (Estado Atual)
 
-### 8.3 Performance
-- Cálculos instantâneos
-- Interface responsiva
-- PWA instalável
-\n## 9. Escopo Excluído (Versão Inicial)
+### 7.1 Acesso
+- Há proteção de rotas no frontend para exigir login.
+- Paywall/assinatura ainda não bloqueia acesso às telas.
 
-- Sugestão automática de manejo\n- Alertas inteligentes
-- Integração com sensores
-- Suporte a múltiplas espécies
-- Funcionalidades de IA
+### 7.2 Salvamento
+- Só salva quando online e autenticado.
+- Offline: cálculo local e feedback ao usuário.
 
-## 10. Imagem de Referência
+## 8. Requisitos de Qualidade
 
-Utilizar a imagem Imagem1.png fornecida pelo usuário como referência visual para o conceito do aplicativo.
+### 8.1 Precisão
+- Motor determinístico.
+- Meta de compatibilidade com Excel mantida como requisito.
 
-## 11. Próximos Passos
+### 8.2 Performance
+- Cálculo local instantâneo no offline.
+- Online delega cálculo à Edge Function; UI mantém responsividade.
 
-1. Implementar exatamente conforme especificado
-2. Lançar para grupo restrito de usuários
-3. Validar confiança e precisão dos cálculos
-4. Coletar feedback\n5. Apenas após validação, considerar adição de funcionalidades inteligentes
+## 9. Lacunas / Itens Pendentes
+
+- Implementar paywall baseado em `subscriptions.status`.
+- Implementar integração com gateway + webhooks e atualização de `subscriptions`.
+- Consolidar estratégia de backend (Edge Function vs Express) e padronizar headers de autenticação.
+- Refinar UI da projeção semanal (tabela e gráfico usando `projections`).
+
+## 10. Critérios de Aceite (Atualizados)
+
+- Login/cadastro funcionando com Supabase.
+- Rotas protegidas (`/calculator`, `/history`).
+- Cálculo online via Edge Function e offline local.
+- Simulações salvas e listadas por usuário.
+- Engine version registrada em cada salvamento.
