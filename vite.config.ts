@@ -18,7 +18,7 @@ export default defineConfig({
     metaImagesPlugin(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.png', 'header-logo.png'],
+      includeAssets: ['favicon.png'],
       manifest: {
         name: 'Peixeiro Raiz',
         short_name: 'Peixeiro',
