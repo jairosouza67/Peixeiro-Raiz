@@ -71,7 +71,7 @@ export default function HistoryPage() {
       }
 
       // invalidate and refetch
-      await queryClient.invalidateQueries(["simulations", user?.id]);
+      await queryClient.invalidateQueries({ queryKey: ["simulations", user?.id] });
       if (selected?.id === id) {
         setSelected(null);
         setOpen(false);

@@ -10,7 +10,8 @@ function getInitials(value: string) {
   if (!trimmed) return "??";
 
   const parts = trimmed
-    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    // Avoid Unicode property escapes for broader TS target compatibility.
+    .replace(/[^A-Za-z0-9\sÀ-ÖØ-öø-ÿ]/g, " ")
     .split(/\s+/)
     .filter(Boolean);
 

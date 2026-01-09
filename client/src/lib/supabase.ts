@@ -14,7 +14,15 @@ if (!supabaseUrl || !supabaseAnonKey) {
     );
 } else {
     try {
-        supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+        supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+            auth: {
+                // Keep user logged in across app restarts (PWA/mobile)
+                persistSession: true,
+                autoRefreshToken: true,
+                detectSessionInUrl: true,
+                storage: window.localStorage,
+            },
+        });
     } catch (error) {
         console.error("[Supabase] Failed to initialize client:", error);
     }
