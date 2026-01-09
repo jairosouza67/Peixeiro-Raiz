@@ -35,7 +35,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <div className="flex flex-col gap-6 mb-10">
             <div className="relative h-24 w-full rounded-xl overflow-hidden shadow-lg border border-sidebar-border/50">
               <img
-                src="/favicon.png"
+                src="/Imagem1.png"
                 alt="Peixeiro Raiz Logo"
                 className="w-full h-full object-cover"
               />
