@@ -67,32 +67,25 @@ export default function HistoryPage() {
               </div>
             ) : (
               simulations?.map((item: any) => (
-                <div key={item.id} className="p-4 flex flex-col md:flex-row md:items-center justify-between hover:bg-muted/5 transition-colors gap-4">
-                  <div className="flex items-start gap-4">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                      <History className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-foreground">{item.name}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {format(new Date(item.date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-                      </p>
+                <div key={item.id} className="p-6 hover:bg-muted/5 transition-colors">
+                  <div className="mb-4">
+                    <div className="rounded-md border border-border bg-slate-50 p-4 text-center">
+                      <div className="text-xs text-muted-foreground">TIPO DE RAÇÃO RECOMENDADA</div>
+                      <div className="mt-2 text-lg font-bold text-foreground">{(item.output as any)?.feedType ?? "-"}</div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-6 md:gap-12 text-sm">
-                    <div>
-                      <span className="block text-xs text-muted-foreground uppercase">Biomassa (kg)</span>
-                      <span className="font-medium">{(item.output as any).biomass}</span>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+                    <div className="rounded-md bg-white p-4 shadow-sm">
+                      <div className="text-xs text-muted-foreground">GRAMAS POR TRATO</div>
+                      <div className="mt-2 text-2xl font-semibold">{(item.output as any)?.feedPerFeeding ?? "-"}</div>
+                      <div className="text-sm text-muted-foreground">grams</div>
                     </div>
-                    <div>
-                      <span className="block text-xs text-muted-foreground uppercase">Custo Dia</span>
-                      <span className="font-medium">R$ {(item.output as any).dailyCost}</span>
-                    </div>
-                    <div>
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
-                        v{item.engine_version}
-                      </span>
+
+                    <div className="rounded-md bg-white p-4 shadow-sm">
+                      <div className="text-xs text-muted-foreground">TRATOS POR DIA</div>
+                      <div className="mt-2 text-2xl font-semibold">{(item.output as any)?.dailyFeedings ?? "-"}</div>
+                      <div className="text-sm text-muted-foreground">vezes ao dia</div>
                     </div>
                   </div>
                 </div>
