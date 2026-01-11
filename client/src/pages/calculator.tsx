@@ -19,8 +19,8 @@ import { supabase } from "@/lib/supabase";
 
 // Schema matching the spreadsheet inputs
 const formSchema = z.object({
-  initialWeight: z.coerce.number().min(0.5, "Peso deve ser maior que 0.5g"),
-  quantity: z.coerce.number().min(1, "Quantidade deve ser maior que 0"),
+  initialWeight: z.coerce.number().min(0.5, "Peso deve ser maior que 0.5g").max(200000, "Peso máximo é 200kg (200.000g)"),
+  quantity: z.coerce.number().min(1, "Quantidade deve ser maior que 0").max(2000000, "Quantidade máxima é 2 milhões de peixes"),
   temperature: z.coerce.number().min(10).max(40),
   feedPrice: z.coerce.number().min(0),
   weeks: z.coerce.number().min(1).max(52),
