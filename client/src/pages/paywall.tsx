@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, ShieldCheck, Zap } from "lucide-react";
 import { useLocation } from "wouter";
 import bgImage from "@assets/generated_images/minimalist_deep_blue_water_surface_pattern.png";
@@ -8,8 +8,14 @@ export default function PaywallPage() {
   const [, setLocation] = useLocation();
 
   const handleSubscribe = () => {
-    // Mock subscription logic
-    setLocation("/calculator");
+    const checkoutUrl = import.meta.env.VITE_CAKTO_CHECKOUT_URL as string | undefined;
+
+    if (!checkoutUrl) {
+      console.warn("[Paywall] Missing VITE_CAKTO_CHECKOUT_URL");
+      return;
+    }
+
+    window.open(checkoutUrl, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -65,19 +71,19 @@ export default function PaywallPage() {
             <CardTitle className="font-heading text-2xl uppercase tracking-wider text-muted-foreground">Assinatura Pro</CardTitle>
             <div className="flex items-baseline justify-center gap-1 mt-4">
               <span className="text-sm text-muted-foreground align-top">R$</span>
-              <span className="text-5xl font-bold text-foreground">49</span>
-              <span className="text-xl text-muted-foreground">,90</span>
-              <span className="text-sm text-muted-foreground">/mês</span>
+              <span className="text-5xl font-bold text-foreground">47</span>
+              <span className="text-xl text-muted-foreground">,00</span>
+              <span className="text-sm text-muted-foreground">/6 meses</span>
             </div>
-            <CardDescription className="mt-2">Cancele quando quiser. Sem fidelidade.</CardDescription>
+            <CardDescription className="mt-2">Use o mesmo e-mail do login do app no checkout.</CardDescription>
           </CardHeader>
 
           <CardContent className="pt-6">
             <Button size="lg" className="w-full text-lg h-14 shadow-lg shadow-primary/25 hover:scale-[1.02] transition-all" onClick={handleSubscribe}>
-              Liberar Acesso Agora
+              Assinar na Cakto
             </Button>
             <p className="text-center text-xs text-muted-foreground mt-4">
-              Pagamento processado de forma 100% segura via Stripe.
+              Pagamento processado de forma segura via Cakto.
             </p>
           </CardContent>
         </Card>

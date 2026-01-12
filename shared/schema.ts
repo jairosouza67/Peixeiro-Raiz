@@ -29,6 +29,14 @@ export const subscriptions = pgTable("subscriptions", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const cakto_entitlements = pgTable("cakto_entitlements", {
+  email: text("email").primaryKey(),
+  status: text("status").notNull().default("blocked"),
+  lastEvent: text("last_event"),
+  rawPayload: jsonb("raw_payload"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const engine_versions = pgTable("engine_versions", {
   version: text("version").primaryKey(),
   logicHash: text("logic_hash").notNull(),

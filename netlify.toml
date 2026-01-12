@@ -11,5 +11,8 @@
 # Environment variables (configure these in Netlify dashboard)
 # VITE_SUPABASE_URL
 # VITE_SUPABASE_ANON_KEY
-# SUPABASE_URL
-# SUPABASE_SERVICE_ROLE_KEY
+# VITE_CAKTO_CHECKOUT_URL
+
+# Note:
+# - SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY / CAKTO_WEBHOOK_SECRET devem ficar no Supabase (Edge Function secrets),
+#   não no Netlify (para evitar exposição/uso indevido).

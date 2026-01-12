@@ -12,8 +12,10 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
+    "cakto:checkout": "tsx script/cakto-discover-checkout.ts",
     "audit": "npm audit --audit-level=moderate",
     "db:push": "drizzle-kit push"
+    ,"cakto:setup": "tsx script/cakto-setup.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

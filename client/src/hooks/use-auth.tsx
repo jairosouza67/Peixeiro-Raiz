@@ -29,6 +29,45 @@ async function syncUserToDb(user: User) {
         if (error) {
             console.warn("[Auth] Failed to sync user row:", error);
         }
+
+        // Ensure default subscription row exists (blocked) for paywall logic.
+        // This assumes RLS allows the authenticated user to insert/select their own row.
+        const { data: existingSub, error: subSelectError } = await supabase
+            .from("subscriptions")
+            .select("id")
+            .eq("user_id", user.id)
+            .maybeSingle();
+
+        if (subSelectError) {
+            console.warn("[Auth] Failed to check subscription row:", subSelectError);
+            return;
+        }
+
+        if (!existingSub?.id) {
+            const { error: subInsertError } = await supabase.from("subscriptions").insert({
+                user_id: user.id,
+                status: "blocked",
+                updated_at: new Date().toISOString(),
+            });
+
+            if (subInsertError) {
+                console.warn("[Auth] Failed to create default subscription row:", subInsertError);
+            }
+        }
+
+        // If the user already bought on Cakto before creating/logging into the app,
+        // the webhook stores an entitlement by email. Here we try to "claim" it.
+        // This update should only succeed if an RLS policy allows it (see docs/supabase_paywall_setup.sql).
+        const { error: claimError } = await supabase
+            .from("subscriptions")
+            .update({ status: "active" })
+            .eq("user_id", user.id)
+            .eq("status", "blocked");
+
+        if (claimError) {
+            // Normal when entitlement isn't active (or policy not installed yet)
+            console.debug("[Auth] Subscription claim skipped:", claimError.message ?? claimError);
+        }
     } catch (error) {
         console.warn("[Auth] Failed to sync user row:", error);
     }

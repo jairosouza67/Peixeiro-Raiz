@@ -8,6 +8,7 @@ import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth";
 import CalculatorPage from "@/pages/calculator";
 import HistoryPage from "@/pages/history";
+import PaywallPage from "@/pages/paywall";
 
 import { ProtectedRoute } from "./components/protected-route";
 import { AuthProvider } from "@/hooks/use-auth";
@@ -16,6 +17,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={AuthPage} />
+      <ProtectedRoute path="/paywall" component={PaywallPage} requireActiveSubscription={false} />
       <ProtectedRoute path="/calculator" component={CalculatorPage} />
       <ProtectedRoute path="/history" component={HistoryPage} />
       <Route component={NotFound} />
