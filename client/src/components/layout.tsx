@@ -55,9 +55,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         "fixed inset-y-0 left-0 z-50 w-64 bg-sidebar text-sidebar-foreground transform transition-transform duration-300 ease-out md:relative md:translate-x-0 border-r border-sidebar-border shadow-2xl",
         mobileOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <div className="p-6 flex flex-col h-full relative">
+        <div className="p-6 flex flex-col h-full relative z-10">
           {/* Subtle gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none z-0" />
           <div className="flex flex-col gap-6 mb-10">
             <div className="relative h-24 w-full rounded-xl overflow-hidden shadow-lg border border-sidebar-border/50">
               <img
@@ -106,7 +106,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             ))}
           </nav>
 
-          <div className="mt-auto pt-6 border-t border-sidebar-border">
+          <div className="mt-auto pt-6 border-t border-sidebar-border relative z-10">
             <div className="flex items-center gap-3 px-4 py-3 rounded-md bg-sidebar-accent/50 mb-4">
               <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs font-bold border border-primary/20">
                 {initials}
@@ -122,7 +122,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 await signOut();
                 setLocation("/");
               }}
-              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-destructive hover:text-destructive/80 transition-colors cursor-pointer bg-transparent border-none text-left"
+              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-destructive hover:text-destructive/80 transition-colors cursor-pointer bg-transparent border-none text-left relative z-20"
             >
               <LogOut className="h-4 w-4" />
               Sair
