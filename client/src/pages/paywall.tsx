@@ -78,40 +78,53 @@ export default function PaywallPage() {
 
   return (
     <div className="min-h-screen bg-background relative flex flex-col items-center justify-center p-4 overflow-hidden">
-      {/* Background */}
+      {/* Layered Background */}
       <div className="absolute inset-0 z-0">
-         <img 
-            src={bgImage} 
-            alt="Background" 
-            className="w-full h-full object-cover opacity-5 grayscale"
-          />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+        <img 
+          src={bgImage} 
+          alt="" 
+          className="w-full h-full object-cover opacity-[0.03] animate-wave"
+        />
+        <div 
+          className="absolute inset-0 opacity-[0.02]"
+          style={{
+            backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--primary)) 1px, transparent 0)`,
+            backgroundSize: '40px 40px'
+          }}
+        />
       </div>
 
-      <div className="relative z-10 max-w-5xl w-full grid md:grid-cols-2 gap-8 items-center">
+      <div className="relative z-10 max-w-5xl w-full grid md:grid-cols-2 gap-12 items-center">
         
         {/* Value Prop */}
         <div className="space-y-6 text-center md:text-left">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium border border-primary/20">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary/15 to-primary/5 text-primary text-sm font-medium border border-primary/20 animate-float-up">
             <Zap className="h-4 w-4" />
             <span>Acesso Antecipado</span>
           </div>
-          <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground leading-tight">
-            Desbloqueie o Poder do <span className="text-primary">Motor de Precisão</span>
+          <h1 className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-[1.15] animate-float-up delay-100">
+            Desbloqueie o Poder do <span className="text-primary relative">
+              Motor de Precisão
+              <svg className="absolute -bottom-1 left-0 w-full h-2 text-primary/30" viewBox="0 0 200 8" preserveAspectRatio="none">
+                <path d="M0 7 Q50 0 100 7 T200 7" stroke="currentColor" strokeWidth="2" fill="none" />
+              </svg>
+            </span>
           </h1>
-          <p className="text-lg text-muted-foreground leading-relaxed">
-            Pare de perder dinheiro com estimativas. Tenha acesso à ferramenta oficial que replica a lógica exata das planilhas de alta performance, agora na nuvem.
+          <p className="text-lg text-muted-foreground leading-relaxed max-w-lg animate-float-up delay-200">
+            Pare de perder dinheiro com estimativas. A ferramenta que replica a lógica exata das planilhas de alta performance.
           </p>
           
-          <div className="space-y-3 pt-4">
+          <div className="space-y-4 pt-4 animate-float-up delay-300">
             {[
               "Motor de cálculo validado célula por célula",
               "Projeções financeiras semanais",
               "Simulações ilimitadas",
-              "Acesso em qualquer dispositivo (Mobile/PC)"
+              "Acesso em qualquer dispositivo"
             ].map((item, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <div className="h-6 w-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center shrink-0">
-                  <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+              <div key={i} className="flex items-center gap-3 group">
+                <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-green-100 to-green-50 dark:from-green-900/40 dark:to-green-900/20 flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 transition-transform">
+                  <Check className="h-4 w-4 text-green-600 dark:text-green-400" strokeWidth={2.5} />
                 </div>
                 <span className="text-foreground/80">{item}</span>
               </div>
@@ -120,36 +133,51 @@ export default function PaywallPage() {
         </div>
 
         {/* Pricing Card */}
-        <Card className="border-primary/20 shadow-2xl shadow-primary/10 bg-card/80 backdrop-blur-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-4 opacity-10">
-            <ShieldCheck className="h-32 w-32 -rotate-12" />
+        <Card className="border-primary/20 shadow-2xl shadow-primary/15 bg-card/90 backdrop-blur-md relative overflow-hidden animate-scale-in delay-200">
+          <div className="absolute top-0 right-0 p-4 opacity-[0.06]">
+            <ShieldCheck className="h-40 w-40 -rotate-12" />
           </div>
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary/80 to-primary/40" />
           
-          <CardHeader className="text-center pb-2">
-            <CardTitle className="font-heading text-2xl uppercase tracking-wider text-muted-foreground">Assinatura Pro</CardTitle>
-            <div className="flex items-baseline justify-center gap-1 mt-4">
-              <span className="text-sm text-muted-foreground align-top">R$</span>
-              <span className="text-5xl font-bold text-foreground">47</span>
-              <span className="text-xl text-muted-foreground">,00</span>
-              <span className="text-sm text-muted-foreground">/6 meses</span>
+          <CardHeader className="text-center pb-2 pt-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/50 text-accent-foreground text-xs font-medium mx-auto mb-4">
+              <span>🔥 Oferta de lançamento</span>
             </div>
-            <CardDescription className="mt-2">Use o mesmo e-mail do login do app no checkout.</CardDescription>
+            <CardTitle className="font-heading text-xl uppercase tracking-[0.2em] text-muted-foreground">Assinatura Pro</CardTitle>
+            <div className="flex items-baseline justify-center gap-1 mt-6">
+              <span className="text-lg text-muted-foreground align-top">R$</span>
+              <span className="text-6xl font-heading font-semibold text-foreground">47</span>
+              <span className="text-xl text-muted-foreground">,00</span>
+            </div>
+            <div className="text-sm text-muted-foreground mt-2">por 6 meses de acesso completo</div>
+            <CardDescription className="mt-4 text-xs bg-muted/50 rounded-lg px-3 py-2 inline-block">Use o mesmo e-mail do login no checkout</CardDescription>
           </CardHeader>
 
-          <CardContent className="pt-6">
-            <Button size="lg" className="w-full text-lg h-14 shadow-lg shadow-primary/25 hover:scale-[1.02] transition-all" onClick={handleSubscribe}>
-              Assinar na Cakto
+          <CardContent className="pt-6 pb-8">
+            <Button 
+              size="lg" 
+              className="w-full text-lg h-14 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 transition-all duration-300 group" 
+              onClick={handleSubscribe}
+            >
+              Assinar Agora
+              <Zap className="ml-2 h-5 w-5 group-hover:scale-110 transition-transform" />
             </Button>
             <Button
               variant="outline"
-              className="w-full mt-3 h-12"
+              className="w-full mt-3 h-12 border-border/60 hover:bg-muted/50"
               onClick={handleRevalidateAccess}
               disabled={checkingAccess}
             >
-              {checkingAccess ? "Validando…" : "Já paguei / Revalidar acesso"}
+              {checkingAccess ? (
+                <span className="flex items-center gap-2">
+                  <span className="h-4 w-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                  Validando…
+                </span>
+              ) : "Já paguei / Revalidar acesso"}
             </Button>
-            <p className="text-center text-xs text-muted-foreground mt-4">
-              Pagamento processado de forma segura via Cakto.
+            <p className="text-center text-xs text-muted-foreground mt-6 flex items-center justify-center gap-1.5">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              Pagamento seguro via Cakto
             </p>
           </CardContent>
         </Card>

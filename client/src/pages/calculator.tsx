@@ -160,20 +160,22 @@ export default function CalculatorPage() {
   return (
     <Layout>
       <div className="space-y-8 pb-12">
-        <div>
-          <h1 className="text-3xl font-heading font-bold text-foreground">Calculadora de Manejo</h1>
-          <p className="text-muted-foreground mt-2">
-            Preencha os dados abaixo para gerar a projeção exata baseada no motor 1.0.
+        <div className="animate-float-up">
+          <h1 className="text-3xl md:text-4xl font-heading font-semibold text-foreground">Calculadora de Manejo</h1>
+          <p className="text-muted-foreground mt-2 max-w-xl">
+            Preencha os parâmetros para gerar a projeção exata de alimentação.
           </p>
         </div>
 
         <div className="grid lg:grid-cols-12 gap-8">
 
           {/* INPUT FORM */}
-          <Card className="lg:col-span-4 h-fit border-border shadow-md">
-            <CardHeader className="bg-muted/30 border-b">
-              <CardTitle className="flex items-center gap-2">
-                <CalculatorIcon className="h-5 w-5 text-primary" />
+          <Card className="lg:col-span-4 h-fit border-border/60 shadow-lg shadow-primary/5 animate-float-up delay-100 overflow-hidden">
+            <CardHeader className="bg-gradient-to-br from-primary/5 to-transparent border-b border-border/50">
+              <CardTitle className="flex items-center gap-2.5 text-lg">
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <CalculatorIcon className="h-4 w-4 text-primary" />
+                </div>
                 Parâmetros de Entrada
               </CardTitle>
             </CardHeader>
@@ -233,9 +235,9 @@ export default function CalculatorPage() {
                   />
 
 
-                  <Button type="submit" className="w-full text-base font-medium mt-4 shadow-md shadow-primary/20 hover:scale-[1.01] transition-transform">
+                  <Button type="submit" className="w-full text-base font-medium mt-4 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 transition-all duration-300 group">
                     Calcular Projeção
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </Button>
                 </form>
               </Form>
@@ -243,21 +245,26 @@ export default function CalculatorPage() {
           </Card>
 
           {/* RESULTS DASHBOARD */}
-          <div className="lg:col-span-8 space-y-6" id="results-section">
+          <div className="lg:col-span-8 space-y-6 animate-float-up delay-200" id="results-section">
             {!result ? (
-              <div className="h-full min-h-[400px] flex flex-col items-center justify-center text-muted-foreground border-2 border-dashed border-border rounded-xl bg-muted/5">
-                <CalculatorIcon className="h-16 w-16 mb-4 opacity-20" />
-                <p className="text-lg font-medium">Aguardando cálculo...</p>
-                <p className="text-sm">Preencha o formulário e clique em calcular.</p>
+              <div className="h-full min-h-[400px] flex flex-col items-center justify-center text-muted-foreground border-2 border-dashed border-border/50 rounded-2xl bg-gradient-to-br from-muted/5 to-transparent relative overflow-hidden">
+                <div className="absolute inset-0 opacity-[0.02]" style={{backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--primary)) 1px, transparent 0)`, backgroundSize: '24px 24px'}} />
+                <div className="relative">
+                  <div className="absolute inset-0 bg-primary/10 rounded-full blur-2xl scale-150" />
+                  <CalculatorIcon className="relative h-16 w-16 mb-4 opacity-30" />
+                </div>
+                <p className="text-lg font-heading font-medium">Aguardando cálculo...</p>
+                <p className="text-sm mt-1">Preencha o formulário e clique em calcular.</p>
               </div>
             ) : (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
 
                 {/* Main Result: Feed Type */}
-                <Card className="border-primary bg-primary/10 shadow-lg overflow-hidden">
-                  <CardContent className="py-8 text-center">
-                    <p className="text-sm font-medium text-primary uppercase tracking-wider mb-2">Tipo de Ração Recomendada</p>
-                    <h2 className="text-3xl md:text-4xl font-bold text-foreground">
+                <Card className="border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent shadow-xl shadow-primary/10 overflow-hidden relative">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                  <CardContent className="py-10 text-center relative">
+                    <p className="text-sm font-medium text-primary uppercase tracking-[0.15em] mb-3">Tipo de Ração Recomendada</p>
+                    <h2 className="text-3xl md:text-5xl font-heading font-semibold text-foreground">
                       {result.feedType}
                     </h2>
                   </CardContent>
@@ -267,37 +274,37 @@ export default function CalculatorPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                   {/* Grams per Feeding */}
-                  <Card className="border-border shadow-md overflow-hidden relative group">
-                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
-                      <Scale className="h-12 w-12 text-primary" />
+                  <Card className="border-border/50 shadow-lg shadow-black/5 overflow-hidden relative group hover:shadow-xl transition-shadow duration-300">
+                    <div className="absolute top-0 right-0 p-4 opacity-[0.08] group-hover:scale-110 group-hover:opacity-15 transition-all duration-300">
+                      <Scale className="h-14 w-14 text-primary" />
                     </div>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Gramas por Trato</CardTitle>
+                      <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-[0.12em]">Gramas por Trato</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex flex-col gap-1">
-                        <span className="text-4xl md:text-5xl font-bold text-foreground">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-4xl md:text-5xl font-heading font-semibold text-foreground">
                           {result.feedPerFeeding.toLocaleString('pt-BR')}
                         </span>
-                        <span className="text-lg text-muted-foreground">gramas</span>
+                        <span className="text-base text-muted-foreground">gramas</span>
                       </div>
                     </CardContent>
                   </Card>
 
                   {/* Times per Day */}
-                  <Card className="border-border shadow-md overflow-hidden relative group">
-                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
-                      <Fish className="h-12 w-12 text-primary" />
+                  <Card className="border-border/50 shadow-lg shadow-black/5 overflow-hidden relative group hover:shadow-xl transition-shadow duration-300">
+                    <div className="absolute top-0 right-0 p-4 opacity-[0.08] group-hover:scale-110 group-hover:opacity-15 transition-all duration-300">
+                      <Fish className="h-14 w-14 text-primary" />
                     </div>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Tratos por Dia</CardTitle>
+                      <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-[0.12em]">Tratos por Dia</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex flex-col gap-1">
-                        <span className="text-4xl md:text-5xl font-bold text-foreground">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-4xl md:text-5xl font-heading font-semibold text-foreground">
                           {result.dailyFeedings}
                         </span>
-                        <span className="text-lg text-muted-foreground">vezes ao dia</span>
+                        <span className="text-base text-muted-foreground">vezes ao dia</span>
                       </div>
                     </CardContent>
                   </Card>

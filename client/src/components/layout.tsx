@@ -52,10 +52,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       {/* Sidebar Navigation */}
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-sidebar text-sidebar-foreground transform transition-transform duration-200 ease-in-out md:relative md:translate-x-0 border-r border-sidebar-border shadow-xl",
+        "fixed inset-y-0 left-0 z-50 w-64 bg-sidebar text-sidebar-foreground transform transition-transform duration-300 ease-out md:relative md:translate-x-0 border-r border-sidebar-border shadow-2xl",
         mobileOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <div className="p-6 flex flex-col h-full">
+        <div className="p-6 flex flex-col h-full relative">
+          {/* Subtle gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
           <div className="flex flex-col gap-6 mb-10">
             <div className="relative h-24 w-full rounded-xl overflow-hidden shadow-lg border border-sidebar-border/50">
               <img
@@ -130,22 +132,32 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto bg-background/50 relative">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 z-[-1] opacity-5 pointer-events-none bg-[radial-gradient(#0ea5e9_1px,transparent_1px)] [background-size:20px_20px]"></div>
+      <main className="flex-1 overflow-auto bg-background relative">
+        {/* Layered Background */}
+        <div className="absolute inset-0 z-[-1] pointer-events-none">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-accent/[0.02]" />
+          <div 
+            className="absolute inset-0 opacity-[0.015]"
+            style={{
+              backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--primary)) 1px, transparent 0)`,
+              backgroundSize: '24px 24px'
+            }}
+          />
+        </div>
 
-        <div className="container mx-auto max-w-6xl p-4 md:p-8 animate-in fade-in duration-500">
+        <div className="container mx-auto max-w-6xl p-4 md:p-8">
           {children}
         </div>
       </main>
 
       {/* Overlay for mobile */}
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
-          onClick={() => setMobileOpen(false)}
-        />
-      )}
+      <div
+        className={cn(
+          "fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden transition-opacity duration-300",
+          mobileOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        )}
+        onClick={() => setMobileOpen(false)}
+      />
     </div>
   );
 }
