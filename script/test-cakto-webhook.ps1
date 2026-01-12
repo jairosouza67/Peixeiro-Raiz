@@ -10,7 +10,10 @@ param(
 
   [Parameter(Mandatory=$false)]
   [ValidateSet('subscription_created','subscription_renewed','purchase_approved','subscription_canceled','subscription_renewal_refused','refund','chargeback')]
-  [string]$Event = 'subscription_created'
+  [string]$Event = 'subscription_created',
+
+  [Parameter(Mandatory=$false)]
+  [string]$AnonKey = ''
 )
 
 $payload = @{
@@ -26,8 +29,18 @@ $payload = @{
 Write-Host "POST $WebhookUrl" -ForegroundColor Cyan
 Write-Host "Event: $Event | Email: $CustomerEmail" -ForegroundColor Cyan
 
+$headers = @{
+  'Content-Type' = 'application/json'
+}
+
+if ($AnonKey) {
+  $headers['apikey'] = $AnonKey
+  $headers['Authorization'] = "Bearer $AnonKey"
+  Write-Host "Using anon key for authentication" -ForegroundColor Yellow
+}
+
 try {
-  $res = Invoke-RestMethod -Uri $WebhookUrl -Method Post -ContentType 'application/json' -Body $payload
+  $res = Invoke-RestMethod -Uri $WebhookUrl -Method Post -Headers $headers -Body $payload
   $res | ConvertTo-Json -Depth 20
 } catch {
   Write-Host "Request failed." -ForegroundColor Red

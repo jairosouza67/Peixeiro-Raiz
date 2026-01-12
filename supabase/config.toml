@@ -1,0 +1,6 @@
+# Supabase local configuration
+# https://supabase.com/docs/guides/cli/config
+
+[functions.cakto-webhook]
+# Disable JWT verification for this function (webhooks don't send JWT)
+verify_jwt = false

@@ -4,7 +4,17 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 // Admin emails with full access (bypass subscription check)
-const ADMIN_EMAILS = ['jairosouza67@gmail.com'];
+// Configure via VITE_ADMIN_EMAILS (comma-separated). Fallback kept for safety.
+const DEFAULT_ADMIN_EMAILS = ["jairosouza67@gmail.com"];
+
+function parseAdminEmailsFromEnv(): string[] {
+    const raw = (import.meta as any)?.env?.VITE_ADMIN_EMAILS as string | undefined;
+    if (!raw || !raw.trim()) return DEFAULT_ADMIN_EMAILS;
+    return raw
+        .split(",")
+        .map((s) => s.trim().toLowerCase())
+        .filter(Boolean);
+}
 
 type SubscriptionStatus = "active" | "blocked";
 
@@ -22,8 +32,9 @@ export function ProtectedRoute({
     const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null);
 
     const isAdmin = useMemo(() => {
-        const email = user?.email ?? "";
-        return ADMIN_EMAILS.includes(email);
+        const adminEmails = parseAdminEmailsFromEnv();
+        const email = (user?.email ?? "").toLowerCase();
+        return adminEmails.includes(email);
     }, [user?.email]);
 
     useEffect(() => {

@@ -1,11 +1,19 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, ShieldCheck, Zap } from "lucide-react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 import bgImage from "@assets/generated_images/minimalist_deep_blue_water_surface_pattern.png";
+import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/lib/supabase";
+import { useToast } from "@/hooks/use-toast";
 
 export default function PaywallPage() {
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  const [checkingAccess, setCheckingAccess] = useState(false);
 
   const handleSubscribe = () => {
     const checkoutUrl = import.meta.env.VITE_CAKTO_CHECKOUT_URL as string | undefined;
@@ -16,6 +24,56 @@ export default function PaywallPage() {
     }
 
     window.open(checkoutUrl, "_blank", "noopener,noreferrer");
+  };
+
+  const handleRevalidateAccess = async () => {
+    if (!user?.id) {
+      setLocation("/");
+      return;
+    }
+
+    try {
+      setCheckingAccess(true);
+
+      // Try to claim access (blocked -> active). This should only succeed if your RLS policy
+      // allows it (see docs/supabase_paywall_setup.sql) and there is an active entitlement.
+      await supabase
+        .from("subscriptions")
+        .update({ status: "active" })
+        .eq("user_id", user.id)
+        .eq("status", "blocked");
+
+      const { data, error } = await supabase
+        .from("subscriptions")
+        .select("status")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Não foi possível validar o acesso",
+          description: error.message,
+        });
+        return;
+      }
+
+      if (data?.status === "active") {
+        toast({
+          title: "Acesso liberado",
+          description: "Assinatura ativa. Redirecionando…",
+        });
+        setLocation("/calculator");
+        return;
+      }
+
+      toast({
+        title: "Acesso ainda bloqueado",
+        description: "Se você acabou de pagar, aguarde alguns segundos e tente novamente.",
+      });
+    } finally {
+      setCheckingAccess(false);
+    }
   };
 
   return (
@@ -81,6 +139,14 @@ export default function PaywallPage() {
           <CardContent className="pt-6">
             <Button size="lg" className="w-full text-lg h-14 shadow-lg shadow-primary/25 hover:scale-[1.02] transition-all" onClick={handleSubscribe}>
               Assinar na Cakto
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full mt-3 h-12"
+              onClick={handleRevalidateAccess}
+              disabled={checkingAccess}
+            >
+              {checkingAccess ? "Validando…" : "Já paguei / Revalidar acesso"}
             </Button>
             <p className="text-center text-xs text-muted-foreground mt-4">
               Pagamento processado de forma segura via Cakto.
