@@ -21,7 +21,7 @@ function getInitials(value: string) {
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const [location, setLocation] = useLocation();
+  const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, signOut } = useAuth();
 
@@ -118,10 +118,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
             <button
               type="button"
-              onClick={async () => {
-                await signOut();
-                setLocation("/");
-              }}
+              onClick={() => void signOut()}
               className="w-full flex items-center gap-3 px-4 py-2 text-sm text-destructive hover:text-destructive/80 transition-colors cursor-pointer bg-transparent border-none text-left relative z-20"
             >
               <LogOut className="h-4 w-4" />

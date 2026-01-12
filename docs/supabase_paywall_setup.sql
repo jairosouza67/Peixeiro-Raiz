@@ -107,6 +107,15 @@ for select
 to authenticated
 using (user_id = auth.uid());
 
+-- 3.3) Políticas para public.cakto_entitlements
+-- Usuário autenticado pode ler o próprio entitlement (por email)
+drop policy if exists "cakto_entitlements_select_own" on public.cakto_entitlements;
+create policy "cakto_entitlements_select_own"
+on public.cakto_entitlements
+for select
+to authenticated
+using (email = (select email from public.users where id = auth.uid()));
+
 -- Usuário autenticado pode criar a própria assinatura (default blocked)
 -- Observação: o app só insere status=blocked. Atualizações de status devem ser feitas pelo webhook (service role).
 drop policy if exists "subscriptions_insert_own" on public.subscriptions;

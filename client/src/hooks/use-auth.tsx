@@ -57,16 +57,27 @@ async function syncUserToDb(user: User) {
 
         // If the user already bought on Cakto before creating/logging into the app,
         // the webhook stores an entitlement by email. Here we try to "claim" it.
-        // This update should only succeed if an RLS policy allows it (see docs/supabase_paywall_setup.sql).
-        const { error: claimError } = await supabase
-            .from("subscriptions")
-            .update({ status: "active" })
-            .eq("user_id", user.id)
-            .eq("status", "blocked");
+        // First check if there's an active entitlement for this user's email to avoid unnecessary 403 errors.
+        if (email) {
+            const { data: entitlement } = await supabase
+                .from("cakto_entitlements")
+                .select("status")
+                .eq("email", email)
+                .eq("status", "active")
+                .maybeSingle();
 
-        if (claimError) {
-            // Normal when entitlement isn't active (or policy not installed yet)
-            console.debug("[Auth] Subscription claim skipped:", claimError.message ?? claimError);
+            // Only attempt to claim if there's an active entitlement
+            if (entitlement?.status === "active") {
+                const { error: claimError } = await supabase
+                    .from("subscriptions")
+                    .update({ status: "active" })
+                    .eq("user_id", user.id)
+                    .eq("status", "blocked");
+
+                if (claimError) {
+                    console.debug("[Auth] Subscription claim failed:", claimError.message ?? claimError);
+                }
+            }
         }
     } catch (error) {
         console.warn("[Auth] Failed to sync user row:", error);
@@ -116,7 +127,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             console.warn("[Auth] Cannot sign out, Supabase not configured");
             return;
         }
-        await supabase.auth.signOut();
+        try {
+            // Use 'local' scope to avoid 403 errors on global logout
+            await supabase.auth.signOut({ scope: 'local' });
+        } catch (error) {
+            // Even if the server-side logout fails (403), clear local session
+            console.warn("[Auth] Sign out error (clearing local session anyway):", error);
+        }
+        // Always clear local state to ensure UI updates
+        setUser(null);
     };
 
     return (

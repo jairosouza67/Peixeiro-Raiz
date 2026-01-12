@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 import { Fish, Waves, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
@@ -17,29 +18,15 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { user, loading: authLoading } = useAuth();
 
-  // If already authenticated, skip login screen
-  // (important for PWA/refreshes where the route '/' still renders AuthPage)
+  // If already authenticated, redirect to calculator
+  // Uses the AuthContext state to avoid conflicts with signOut
   useEffect(() => {
-    let cancelled = false;
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (cancelled) return;
-      if (session?.user) setLocation("/calculator");
-    }).catch(() => {
-      // ignore
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (cancelled) return;
-      if (session?.user) setLocation("/calculator");
-    });
-
-    return () => {
-      cancelled = true;
-      subscription.unsubscribe();
-    };
-  }, [setLocation]);
+    if (!authLoading && user) {
+      setLocation("/calculator");
+    }
+  }, [user, authLoading, setLocation]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
