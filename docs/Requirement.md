@@ -42,10 +42,13 @@ Substituir a planilha Excel original por uma solução web confiável, versionad
 - Contexto de sessão no frontend (`client/src/hooks/use-auth.tsx`).
 - Sincronização de um registro em `users` via `upsert` após login (perfil básico: `email`, `full_name`).
 
-### 3.2 Controle de Acesso / Assinatura (Parcial)
-- Existe tabela `subscriptions` e conceito de status (`blocked`, `active`).
-- **Ainda não está implementado no frontend** um paywall baseado em `subscriptions`.
-- Integração com gateway (Stripe/Mercado Pago) e webhooks: **previsto**, não concluído.
+### 3.2 Controle de Acesso / Assinatura (Implementado ✅)
+- Tabela `subscriptions` com status (`blocked`, `active`).
+- Tabela `cakto_entitlements` para armazenar compras por email (permite compra antes do cadastro).
+- **Paywall implementado no frontend** em `/paywall`.
+- Integração com **Cakto** via webhook (`cakto-webhook` Edge Function).
+- Rotas protegidas verificam `subscriptions.status === 'active'`.
+- Claim automático de acesso no login (se existir entitlement ativo para o email).
 
 ### 3.3 Calculadora de Manejo (Implementado)
 - Tela protegida: `/calculator`.
@@ -122,13 +125,20 @@ Tipo `SimulationOutput`:
 
 ### 5.3 `subscriptions`
 - `id` (uuid, pk)
-- `user_id` (uuid, fk users)
+- `user_id` (uuid, fk users, unique)
 - `status` (text: `blocked` | `active`)
 - `plan_id` (text, null)
 - `trial_end` (timestamp, null)
 - `updated_at` (timestamp)
 
-### 5.4 `engine_versions`
+### 5.4 `cakto_entitlements`
+- `email` (text, pk)
+- `status` (text: `blocked` | `active`)
+- `last_event` (text, null)
+- `raw_payload` (jsonb, null)
+- `updated_at` (timestamp)
+
+### 5.5 `engine_versions`
 - `version` (text, pk)
 - `logic_hash` (text)
 - `status` (text)
@@ -138,8 +148,9 @@ Tipo `SimulationOutput`:
 
 ### 6.1 Rotas do Frontend
 - `/` → Auth (login/cadastro)
-- `/calculator` → Calculadora (protegida)
-- `/history` → Histórico (protegida)
+- `/paywall` → Tela de assinatura (protegida, não requer assinatura ativa)
+- `/calculator` → Calculadora (protegida, requer assinatura ativa)
+- `/history` → Histórico (protegida, requer assinatura ativa)
 
 ### 6.2 Rotas do Servidor Node (no repo)
 - `GET /health` → status
@@ -152,8 +163,9 @@ Tipo `SimulationOutput`:
 ## 7. Regras de Negócio (Estado Atual)
 
 ### 7.1 Acesso
-- Há proteção de rotas no frontend para exigir login.
-- Paywall/assinatura ainda não bloqueia acesso às telas.
+- Proteção de rotas no frontend exige login.
+- Paywall bloqueia acesso às telas `/calculator` e `/history` quando `subscriptions.status !== 'active'`.
+- Usuários admin (configurados via `VITE_ADMIN_EMAILS`) têm bypass do paywall.
 
 ### 7.2 Salvamento
 - Só salva quando online e autenticado.
@@ -171,15 +183,41 @@ Tipo `SimulationOutput`:
 
 ## 9. Lacunas / Itens Pendentes
 
-- Implementar paywall baseado em `subscriptions.status`.
-- Implementar integração com gateway + webhooks e atualização de `subscriptions`.
+- ~~Implementar paywall baseado em `subscriptions.status`.~~ ✅ Concluído
+- ~~Implementar integração com gateway + webhooks e atualização de `subscriptions`.~~ ✅ Concluído (Cakto)
 - Consolidar estratégia de backend (Edge Function vs Express) e padronizar headers de autenticação.
 - Refinar UI da projeção semanal (tabela e gráfico usando `projections`).
+- Implementar notificação de expiração de assinatura.
+- Adicionar página de gerenciamento de assinatura para o usuário.
 
 ## 10. Critérios de Aceite (Atualizados)
 
 - Login/cadastro funcionando com Supabase.
-- Rotas protegidas (`/calculator`, `/history`).
+- Rotas protegidas (`/calculator`, `/history`) exigem assinatura ativa.
+- Paywall funcional com redirecionamento para checkout Cakto.
+- Webhook Cakto recebendo eventos e atualizando `subscriptions`.
 - Cálculo online via Edge Function e offline local.
 - Simulações salvas e listadas por usuário.
 - Engine version registrada em cada salvamento.
+
+## 11. Integração de Pagamentos
+
+### 11.1 Gateway
+- **Cakto** como gateway de pagamentos
+- Assinatura semestral: R$ 47,00 a cada 6 meses
+- Checkout URL: `https://pay.cakto.com.br/mddttpo_722244`
+
+### 11.2 Webhook
+- Edge Function: `cakto-webhook`
+- URL: `https://kqnrfcapowhwfalwaoxj.supabase.co/functions/v1/cakto-webhook`
+- Eventos processados:
+  - Liberar acesso: `subscription_created`, `subscription_renewed`, `purchase_approved`
+  - Bloquear acesso: `subscription_canceled`, `subscription_renewal_refused`, `refund`, `chargeback`
+
+### 11.3 Fluxo de Compra
+1. Usuário acessa `/paywall`
+2. Clica em "Assinar na Cakto"
+3. Completa pagamento na Cakto (usando mesmo email do app)
+4. Cakto envia webhook → `cakto_entitlements` atualizado
+5. Usuário faz login → `subscriptions` atualizado automaticamente
+6. Acesso liberado

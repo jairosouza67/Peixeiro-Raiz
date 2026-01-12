@@ -140,14 +140,17 @@ Valide no Supabase que:
 
 ## 5) Checklist final (para ir pra produção)
 
-- [ ] Checkout mensal ativo e `checkoutUrl` copiado
-- [ ] Webhook configurado com os eventos corretos
-- [ ] `fields.secret` do webhook guardado
-- [ ] `CAKTO_WEBHOOK_SECRET` configurado no Supabase
-- [ ] Tabela `subscriptions` com default `blocked` e RLS ajustado
-- [ ] Edge Function `cakto-webhook` publicada e recebendo eventos
-- [ ] App bloqueia rotas quando `blocked` e libera quando `active`
-- [ ] Paywall abre checkout e orienta “mesmo e-mail”
+- [x] Checkout semestral ativo e `checkoutUrl` copiado (`https://pay.cakto.com.br/mddttpo_722244`)
+- [x] Webhook configurado com os eventos corretos (ID: 34770)
+- [x] `fields.secret` do webhook guardado
+- [x] `CAKTO_WEBHOOK_SECRET` configurado no Supabase
+- [x] Tabela `subscriptions` com default `blocked` e RLS ajustado
+- [x] Tabela `cakto_entitlements` para armazenar compras por email
+- [x] Edge Function `cakto-webhook` publicada e recebendo eventos (JWT desabilitado)
+- [x] App bloqueia rotas quando `blocked` e libera quando `active`
+- [x] Paywall abre checkout e orienta "mesmo e-mail"
+- [x] Claim automático de acesso no login via entitlements
+- [x] Script de teste do webhook (`script/test-cakto-webhook.ps1`)
 
 ---
 

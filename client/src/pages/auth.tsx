@@ -112,7 +112,7 @@ export default function AuthPage() {
             Domine sua produção com precisão absoluta.
           </h1>
           <p className="text-lg text-white/80 leading-relaxed">
-            Deixe as planilhas complexas para trás. O sistema definitivo para cálculo de biomassa, ração e lucro para o produtor profissional.
+            Deixe as planilhas complexas para trás. O sistema definitivo para cálculo da quantidade e tipo de ração para o produtor profissional.
           </p>
         </div>
 

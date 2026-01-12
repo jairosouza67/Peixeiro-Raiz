@@ -7,7 +7,7 @@ Depois disso, fecho com o **PASSO 3 — MVP**.
 
 ## 1. Visão do Produto
 
-**Nome (provisório):** Criador Inteligente
+**Nome:** Peixeiro Raiz
 **Tipo:** Web App + PWA
 **Objetivo:** Executar cálculos alimentares e projeções de crescimento de tilápias **idênticos à planilha original**, com controle de acesso via pagamento.
 
@@ -53,11 +53,12 @@ Depois disso, fecho com o **PASSO 3 — MVP**.
 
 ### 4.1 Frontend
 
-* Next.js (App Router)
-* TypeScript
-* Tailwind + Shadcn UI
-* PWA habilitado
-* Cálculo executado no frontend (sem custo de infra)
+* Vite + React (TypeScript)
+* Roteamento: wouter
+* Tailwind + Shadcn UI (Radix)
+* Estado/requests: @tanstack/react-query
+* PWA habilitado (vite-plugin-pwa)
+* Cálculo executado no frontend (offline) ou via Edge Function (online)
 
 ### 4.2 Backend
 
@@ -66,7 +67,8 @@ Depois disso, fecho com o **PASSO 3 — MVP**.
   * Auth
   * Postgres
   * RLS
-  * Edge Functions (webhooks)
+  * Edge Functions (cálculo e webhooks)
+  * Integração Cakto via webhook
 
 ---
 
@@ -81,30 +83,44 @@ Depois disso, fecho com o **PASSO 3 — MVP**.
 
 ### Controle
 
-* Middleware no frontend:
+* ProtectedRoute no frontend verifica:
+  * Usuário autenticado?
+  * `subscriptions.status === 'active'`?
+  * É admin? (bypass via `VITE_ADMIN_EMAILS`)
 
-```ts
-if (!subscription.active) redirect('/paywall')
+```tsx
+if (!user) return <Redirect to="/" />
+if (subscriptionStatus !== 'active' && !isAdmin) return <Redirect to="/paywall" />
 ```
 
 ---
 
-## 6. Pagamento
+## 6. Pagamento ✅ IMPLEMENTADO
 
 ### Estratégia
 
-* Gateway externo (Stripe / Mercado Pago)
-* Webhook → Supabase Edge Function
-* Atualiza status da assinatura
+* Gateway: **Cakto**
+* Assinatura semestral: R$ 47,00 a cada 6 meses
+* Webhook → Supabase Edge Function (`cakto-webhook`)
+* Atualiza status da assinatura baseado em eventos
+* Vínculo por email (mesmo email do checkout = email do app)
 
 ### Tabela `subscriptions`
 
 * id
-* user_id
-* status (`inactive | active | canceled`)
-* plan
-* expires_at
-* gateway_ref
+* user_id (unique)
+* status (`blocked | active`)
+* plan_id
+* trial_end
+* updated_at
+
+### Tabela `cakto_entitlements`
+
+* email (pk)
+* status (`blocked | active`)
+* last_event
+* raw_payload
+* updated_at
 
 ---
 
@@ -171,7 +187,7 @@ Agora fechamos com o **produto mínimo viável**, respeitando tudo acima.
 
 ## 1. Telas do MVP
 
-### Tela 1 — Login / Cadastro
+### Tela 1 — Login / Cadastro ✅
 
 * Email
 * Senha
@@ -179,71 +195,104 @@ Agora fechamos com o **produto mínimo viável**, respeitando tudo acima.
 
 ---
 
-### Tela 2 — Paywall
+### Tela 2 — Paywall ✅
 
-* Mensagem clara
-* Botão “Assinar”
-* Status da assinatura
+* Mensagem clara com proposta de valor
+* Botão "Assinar na Cakto" (abre checkout externo)
+* Botão "Já paguei / Revalidar acesso"
+* Orientação: usar mesmo email do app
 
 ---
 
-### Tela 3 — Formulário de Cálculo
+### Tela 3 — Formulário de Cálculo ✅
 
-Campos **idênticos à planilha**:
+Campos **visíveis no formulário**:
 
-* Peso médio inicial
+* Peso médio inicial (g)
 * Quantidade de peixes
-* Fase (se existir)
-* Temperatura (se usada)
-* Preço da ração
-* Número de semanas
+* Temperatura (°C)
+
+Campos **internos** (valores padrão):
+
+* Preço da ração: R$ 4,50/kg
+* Número de semanas: 12
+* Fase: Autodetect
 
 ---
 
-### Tela 4 — Resultado Imediato
+### Tela 4 — Resultado Imediato ✅
 
-* Biomassa
-* Ração/dia
+* Tipo de ração recomendada
+* Ração por trato (g) - número inteiro
 * Tratos/dia
-* Ração por trato
-* Custo diário
+* (Disponível no motor: biomassa, ração/dia, custo diário, FCR)
 
 ---
 
-### Tela 5 — Projeção
+### Tela 5 — Projeção (Parcial)
 
-* Tabela semanal
-* Peso médio por semana
-* Consumo acumulado
-* Gráfico simples
+* Dados disponíveis no motor (`projections[]`)
+* Tabela semanal: pendente refinação de UI
+* Gráfico: Recharts importado, UI pendente
 
 ---
 
-## 2. Fluxo Técnico do MVP
+### Tela 6 — Histórico de Simulações ✅
+
+* Lista simulações salvas por usuário
+* Modal de detalhes
+* Opção de deletar
+
+---
+
+## 2. Fluxo Técnico do MVP ✅
 
 ```
-Login
+Login (Supabase Auth)
   ↓
-Verifica assinatura
+Sync user + subscription (upsert)
+  ↓
+Claim entitlement (se existir compra prévia)
+  ↓
+Verifica subscription.status
+  ↓
+[blocked] → /paywall → Checkout Cakto → Webhook → Libera
+[active] → /calculator
   ↓
 Formulário
   ↓
-Motor de cálculo (local)
+Motor de cálculo (local offline / Edge Function online)
   ↓
 Exibe resultado
   ↓
-Salva simulação
+Salva simulação (se online)
 ```
 
 ---
 
 ## 3. O que torna esse MVP forte
 
-* Já é vendável
-* Já é confiável
-* Já substitui a planilha
-* Já cria dependência do usuário
-* Já permite escalar depois
+* ✅ Já é vendável (paywall + Cakto integrado)
+* ✅ Já é confiável (motor versionado)
+* ✅ Já substitui a planilha
+* ✅ Já cria dependência do usuário
+* ✅ Já permite escalar depois
+* ✅ Funciona offline (PWA)
+
+---
+
+# 🎯 Status Atual (Janeiro 2026)
+
+| Componente | Status |
+|------------|--------|
+| Autenticação | ✅ Implementado |
+| Paywall | ✅ Implementado |
+| Integração Cakto | ✅ Implementado |
+| Webhook | ✅ Funcionando |
+| Calculadora | ✅ Implementado |
+| Histórico | ✅ Implementado |
+| Projeções UI | ⚠️ Pendente refinação |
+| PWA | ✅ Habilitado |
 
 ---
 
