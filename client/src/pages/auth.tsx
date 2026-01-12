@@ -94,12 +94,11 @@ export default function AuthPage() {
         <div className="absolute inset-0 z-0 bg-gradient-to-br from-[hsl(215,50%,15%)] via-[hsl(215,80%,30%)] to-[hsl(215,50%,12%)]" />
         
         {/* Animated water texture overlay */}
-        <div className="absolute inset-0 z-[1]">
+        <div className="absolute -inset-[10%] z-[1]">
           <img
             src={bgImage}
             alt=""
-            className="w-[120%] h-[120%] object-cover opacity-25 mix-blend-overlay animate-wave"
-            style={{ marginLeft: '-10%', marginTop: '-10%' }}
+            className="w-full h-full object-cover opacity-25 mix-blend-overlay animate-wave"
           />
         </div>
         
