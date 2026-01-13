@@ -16,8 +16,8 @@ import { AuthProvider } from "@/hooks/use-auth";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={AuthPage} />
-      <ProtectedRoute path="/paywall" component={PaywallPage} requireActiveSubscription={false} />
+      <Route path="/" component={PaywallPage} />
+      <Route path="/login" component={AuthPage} />
       <ProtectedRoute path="/calculator" component={CalculatorPage} />
       <ProtectedRoute path="/history" component={HistoryPage} />
       <Route component={NotFound} />

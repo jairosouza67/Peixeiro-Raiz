@@ -40,13 +40,13 @@ export default function NotFound() {
             <Button variant="outline" asChild className="group">
               <Link href="/">
                 <ArrowLeft className="mr-2 h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-                Voltar
+                Página Inicial
               </Link>
             </Button>
             <Button asChild className="group">
-              <Link href="/calculator">
+              <Link href="/login">
                 <Home className="mr-2 h-4 w-4" />
-                Ir para Calculadora
+                Fazer Login
               </Link>
             </Button>
           </div>

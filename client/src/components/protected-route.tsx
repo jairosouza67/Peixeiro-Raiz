@@ -100,11 +100,11 @@ export function ProtectedRoute({
     }
 
     if (!user) {
-        return <Redirect to="/" />;
+        return <Redirect to="/login" />;
     }
 
     if (requireActiveSubscription && !isAdmin && subscriptionStatus !== "active") {
-        return <Redirect to="/paywall" />;
+        return <Redirect to="/" />;
     }
 
     return <Route path={path} component={Component as any} />;

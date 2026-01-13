@@ -28,7 +28,7 @@ export default function PaywallPage() {
 
   const handleRevalidateAccess = async () => {
     if (!user?.id) {
-      setLocation("/");
+      setLocation("/login");
       return;
     }
 
@@ -197,6 +197,16 @@ export default function PaywallPage() {
               <ShieldCheck className="h-3.5 w-3.5" />
               Pagamento seguro via Cakto
             </p>
+            
+            <div className="mt-6 pt-6 border-t border-border/50 text-center">
+              <button
+                type="button"
+                onClick={() => setLocation("/login")}
+                className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+              >
+                Entrar na área de Membros
+              </button>
+            </div>
           </CardContent>
         </Card>
       </div>
