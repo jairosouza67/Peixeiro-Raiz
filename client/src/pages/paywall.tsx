@@ -164,13 +164,14 @@ export default function PaywallPage() {
                   : "border-border/50 bg-muted/20 hover:border-border hover:bg-muted/30"
               }`}
             >
-              <div className="text-sm font-medium text-muted-foreground mb-2 text-center">Assinatura Trimestral</div>
-              <div className="flex items-baseline justify-center gap-1">
-                <span className="text-lg text-muted-foreground align-top">R$</span>
-                <span className="text-4xl font-heading font-semibold text-foreground">37</span>
-                <span className="text-xl text-muted-foreground">,00</span>
+              <div className="text-sm font-medium text-muted-foreground mb-3 text-center">Assinatura Trimestral</div>
+              <div className="text-center mb-3">
+                <span className="text-2xl md:text-3xl font-semibold text-foreground">Menos de R$ 0,50/dia</span>
               </div>
-              <div className="text-xs text-muted-foreground mt-1 text-center">por 3 meses de acesso</div>
+              <div className="pt-3 border-t border-border/30 text-center">
+                <span className="text-sm text-muted-foreground">R$ 37,00</span>
+                <span className="text-xs text-muted-foreground/70 ml-1">por 3 meses</span>
+              </div>
             </button>
             
             {/* Assinatura Anual */}
@@ -184,13 +185,14 @@ export default function PaywallPage() {
               }`}
             >
               <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-primary text-primary-foreground text-xs font-medium rounded">Melhor valor</div>
-              <div className="text-sm font-medium text-muted-foreground mb-2 text-center">Assinatura Anual</div>
-              <div className="flex items-baseline justify-center gap-1">
-                <span className="text-lg text-muted-foreground align-top">R$</span>
-                <span className="text-4xl font-heading font-semibold text-foreground">97</span>
-                <span className="text-xl text-muted-foreground">,00</span>
+              <div className="text-sm font-medium text-muted-foreground mb-3 text-center">Assinatura Anual</div>
+              <div className="text-center mb-3">
+                <span className="text-2xl md:text-3xl font-semibold text-foreground">Menos de R$ 0,30/dia</span>
               </div>
-              <div className="text-xs text-muted-foreground mt-1 text-center">por 12 meses de acesso</div>
+              <div className="pt-3 border-t border-border/30 text-center">
+                <span className="text-sm text-muted-foreground">R$ 97,00</span>
+                <span className="text-xs text-muted-foreground/70 ml-1">por 12 meses</span>
+              </div>
             </button>
             
             <CardDescription className="mt-4 text-xs bg-muted/50 rounded-lg px-3 py-2 inline-block">Use o mesmo e-mail do login no checkout</CardDescription>
