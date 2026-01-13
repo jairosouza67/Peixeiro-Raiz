@@ -14,12 +14,21 @@ export default function PaywallPage() {
   const { toast } = useToast();
 
   const [checkingAccess, setCheckingAccess] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<"trimestral" | "anual">("anual");
 
   const handleSubscribe = () => {
-    const checkoutUrl = import.meta.env.VITE_CAKTO_CHECKOUT_URL as string | undefined;
+    const checkoutUrlTrimestral = import.meta.env.VITE_CAKTO_CHECKOUT_URL_TRIMESTRAL as string | undefined;
+    const checkoutUrlAnual = import.meta.env.VITE_CAKTO_CHECKOUT_URL_ANUAL as string | undefined;
+
+    const checkoutUrl = selectedPlan === "trimestral" ? checkoutUrlTrimestral : checkoutUrlAnual;
 
     if (!checkoutUrl) {
-      console.warn("[Paywall] Missing VITE_CAKTO_CHECKOUT_URL");
+      console.warn(`[Paywall] Missing VITE_CAKTO_CHECKOUT_URL_${selectedPlan.toUpperCase()}`);
+      toast({
+        variant: "destructive",
+        title: "Erro ao abrir checkout",
+        description: "URL de pagamento não configurada. Tente novamente mais tarde.",
+      });
       return;
     }
 
@@ -146,27 +155,43 @@ export default function PaywallPage() {
             <CardTitle className="font-heading text-xl uppercase tracking-[0.2em] text-muted-foreground">Escolha seu plano</CardTitle>
             
             {/* Assinatura Trimestral */}
-            <div className="mt-6 p-4 rounded-lg border border-border/50 bg-muted/20">
-              <div className="text-sm font-medium text-muted-foreground mb-2">Assinatura Trimestral</div>
+            <button
+              type="button"
+              onClick={() => setSelectedPlan("trimestral")}
+              className={`mt-6 p-4 rounded-lg border w-full text-left transition-all ${
+                selectedPlan === "trimestral"
+                  ? "border-2 border-primary/60 bg-primary/5 ring-2 ring-primary/20"
+                  : "border-border/50 bg-muted/20 hover:border-border hover:bg-muted/30"
+              }`}
+            >
+              <div className="text-sm font-medium text-muted-foreground mb-2 text-center">Assinatura Trimestral</div>
               <div className="flex items-baseline justify-center gap-1">
                 <span className="text-lg text-muted-foreground align-top">R$</span>
                 <span className="text-4xl font-heading font-semibold text-foreground">37</span>
                 <span className="text-xl text-muted-foreground">,00</span>
               </div>
-              <div className="text-xs text-muted-foreground mt-1">por 3 meses de acesso</div>
-            </div>
+              <div className="text-xs text-muted-foreground mt-1 text-center">por 3 meses de acesso</div>
+            </button>
             
             {/* Assinatura Anual */}
-            <div className="mt-4 p-4 rounded-lg border-2 border-primary/40 bg-primary/5 relative">
+            <button
+              type="button"
+              onClick={() => setSelectedPlan("anual")}
+              className={`mt-4 p-4 rounded-lg border w-full text-left transition-all relative ${
+                selectedPlan === "anual"
+                  ? "border-2 border-primary/60 bg-primary/5 ring-2 ring-primary/20"
+                  : "border-border/50 bg-muted/20 hover:border-border hover:bg-muted/30"
+              }`}
+            >
               <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-primary text-primary-foreground text-xs font-medium rounded">Melhor valor</div>
-              <div className="text-sm font-medium text-muted-foreground mb-2">Assinatura Anual</div>
+              <div className="text-sm font-medium text-muted-foreground mb-2 text-center">Assinatura Anual</div>
               <div className="flex items-baseline justify-center gap-1">
                 <span className="text-lg text-muted-foreground align-top">R$</span>
                 <span className="text-4xl font-heading font-semibold text-foreground">97</span>
                 <span className="text-xl text-muted-foreground">,00</span>
               </div>
-              <div className="text-xs text-muted-foreground mt-1">por 12 meses de acesso</div>
-            </div>
+              <div className="text-xs text-muted-foreground mt-1 text-center">por 12 meses de acesso</div>
+            </button>
             
             <CardDescription className="mt-4 text-xs bg-muted/50 rounded-lg px-3 py-2 inline-block">Use o mesmo e-mail do login no checkout</CardDescription>
           </CardHeader>
