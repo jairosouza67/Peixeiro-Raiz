@@ -224,13 +224,19 @@ export default function PaywallPage() {
             </p>
             
             <div className="mt-6 pt-6 border-t border-border/50 text-center">
-              <button
-                type="button"
-                onClick={() => setLocation("/login")}
-                className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-              >
-                Entrar na área de Membros
-              </button>
+              {user ? (
+                <p className="text-sm text-muted-foreground">
+                  Logado como <span className="font-medium text-foreground">{user.email}</span>
+                </p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setLocation("/login")}
+                  className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+                >
+                  Entrar na área de Membros
+                </button>
+              )}
             </div>
           </CardContent>
         </Card>
