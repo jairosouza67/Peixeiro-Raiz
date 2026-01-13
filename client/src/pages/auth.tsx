@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
-import { Fish, Waves, ArrowRight } from "lucide-react";
+import { Waves, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import bgImage from "@assets/generated_images/minimalist_deep_blue_water_surface_pattern.png";
@@ -105,8 +105,8 @@ export default function AuthPage() {
         <div className="relative z-10 flex items-center gap-4 animate-float-up">
           <div className="relative">
             <div className="absolute inset-0 bg-white/20 rounded-xl blur-xl" />
-            <div className="relative bg-white/10 p-3 rounded-xl backdrop-blur-md border border-white/20 shadow-2xl">
-              <Fish className="h-9 w-9" strokeWidth={1.5} />
+            <div className="relative bg-white/10 p-2 rounded-xl backdrop-blur-md border border-white/20 shadow-2xl">
+              <img src="/fish-logo.png" alt="Logo" className="h-10 w-10 rounded-lg" />
             </div>
           </div>
           <div>
@@ -160,8 +160,8 @@ export default function AuthPage() {
         <div className="relative w-full max-w-md space-y-8">
           {/* Mobile logo */}
           <div className="flex items-center justify-center gap-3 lg:hidden animate-scale-in">
-            <div className="bg-primary/10 p-2.5 rounded-xl">
-              <Fish className="h-7 w-7 text-primary" strokeWidth={1.5} />
+            <div className="bg-primary/10 p-1.5 rounded-xl">
+              <img src="/fish-logo.png" alt="Logo" className="h-8 w-8 rounded-lg" />
             </div>
             <span className="font-heading text-xl font-semibold text-foreground">O PEIXEIRO RAIZ</span>
           </div>

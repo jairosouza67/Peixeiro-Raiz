@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Fish, Calculator, History, LogOut, Menu, X } from "lucide-react";
+import { Calculator, History, LogOut, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -42,7 +42,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between p-4 border-b bg-card">
         <div className="flex items-center gap-2 text-primary">
-          <Fish className="h-6 w-6" />
+          <img src="/fish-logo.png" alt="Logo" className="h-8 w-8 rounded-full" />
           <span className="font-heading font-bold text-lg uppercase tracking-wide">O Peixeiro Raiz</span>
         </div>
         <Button variant="ghost" size="icon" onClick={() => setMobileOpen(!mobileOpen)}>
@@ -71,8 +71,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
 
             <div className="flex items-center gap-3 text-primary-foreground px-2">
-              <div className="bg-primary p-2 rounded-lg shadow-md shadow-primary/20">
-                <Fish className="h-5 w-5 text-white" />
+              <div className="bg-white p-1 rounded-lg shadow-md shadow-primary/20">
+                <img src="/fish-logo.png" alt="Logo" className="h-7 w-7 rounded" />
               </div>
               <div className="flex flex-col">
                 <span className="font-heading font-bold text-sm uppercase leading-none">Painel de</span>
