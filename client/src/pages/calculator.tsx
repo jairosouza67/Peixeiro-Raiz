@@ -161,7 +161,7 @@ export default function CalculatorPage() {
     <Layout>
       <div className="space-y-8 pb-12">
         <div className="animate-float-up">
-          <h1 className="text-3xl md:text-4xl font-heading font-semibold text-foreground">Calculadora de Manejo</h1>
+          <h1 className="text-3xl md:text-4xl font-heading font-semibold text-foreground">Calculadora de arraçoamento</h1>
           <p className="text-muted-foreground mt-2 max-w-xl">
             Preencha os parâmetros para gerar a projeção exata de alimentação.
           </p>
