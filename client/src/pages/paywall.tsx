@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, ShieldCheck, Zap } from "lucide-react";
+import { Check, LogOut, ShieldCheck, Zap } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import bgImage from "@assets/generated_images/minimalist_deep_blue_water_surface_pattern.png";
@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function PaywallPage() {
   const [, setLocation] = useLocation();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { toast } = useToast();
 
   const [checkingAccess, setCheckingAccess] = useState(false);
@@ -226,13 +226,42 @@ export default function PaywallPage() {
             </p>
             
             <div className="mt-6 pt-6 border-t border-border/50 text-center">
-              <button
-                type="button"
-                onClick={() => setLocation(user ? "/calculator" : "/login")}
-                className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-              >
-                {user ? "Bem-vindo de volta! Entrar →" : "Entrar na área de Membros"}
-              </button>
+              {user ? (
+                <div className="space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    Logado como <span className="font-medium text-foreground">{user.email}</span>
+                  </p>
+                  <div className="flex items-center justify-center gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setLocation("/calculator")}
+                      className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+                    >
+                      Entrar no sistema →
+                    </button>
+                    <span className="text-muted-foreground/50">|</span>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        await signOut();
+                        setLocation("/login");
+                      }}
+                      className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1.5"
+                    >
+                      <LogOut className="h-3.5 w-3.5" />
+                      Trocar de conta
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setLocation("/login")}
+                  className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+                >
+                  Entrar na área de Membros
+                </button>
+              )}
             </div>
           </CardContent>
         </Card>
