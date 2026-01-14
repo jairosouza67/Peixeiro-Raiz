@@ -228,25 +228,25 @@ export default function PaywallPage() {
             <div className="mt-6 pt-6 border-t border-border/50 text-center">
               {user ? (
                 <div className="space-y-3">
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground break-all px-2">
                     Logado como <span className="font-medium text-foreground">{user.email}</span>
                   </p>
-                  <div className="flex items-center justify-center gap-4">
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
                     <button
                       type="button"
                       onClick={() => setLocation("/calculator")}
-                      className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+                      className="text-sm font-medium text-primary hover:text-primary/80 transition-colors py-2 px-3 rounded-md hover:bg-primary/5"
                     >
                       Entrar no sistema →
                     </button>
-                    <span className="text-muted-foreground/50">|</span>
+                    <span className="hidden sm:inline text-muted-foreground/50">|</span>
                     <button
                       type="button"
                       onClick={async () => {
                         await signOut();
                         setLocation("/login");
                       }}
-                      className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1.5"
+                      className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1.5 py-2 px-3 rounded-md hover:bg-muted/50"
                     >
                       <LogOut className="h-3.5 w-3.5" />
                       Trocar de conta
