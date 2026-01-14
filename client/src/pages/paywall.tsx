@@ -23,7 +23,9 @@ export default function PaywallPage() {
     const checkoutUrl = selectedPlan === "trimestral" ? checkoutUrlTrimestral : checkoutUrlAnual;
 
     if (!checkoutUrl) {
-      console.warn(`[Paywall] Missing VITE_CAKTO_CHECKOUT_URL_${selectedPlan.toUpperCase()}`);
+      if (import.meta.env.DEV) {
+        console.warn(`[Paywall] Missing VITE_CAKTO_CHECKOUT_URL_${selectedPlan.toUpperCase()}`);
+      }
       toast({
         variant: "destructive",
         title: "Erro ao abrir checkout",

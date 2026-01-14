@@ -15,13 +15,21 @@ declare module "http" {
   }
 }
 
-// CORS Configuration
-const allowedOrigins = [
-  "http://localhost:5000",
-  "http://127.0.0.1:5000",
-  // Add production domain when deploying
-  // "https://yourdomain.com"
-];
+// CORS Configuration - read from environment variable for flexibility
+function getAllowedOrigins(): string[] {
+  const envOrigins = process.env.ALLOWED_ORIGINS;
+  if (envOrigins) {
+    return envOrigins.split(",").map((o) => o.trim()).filter(Boolean);
+  }
+  
+  // Default fallback for development
+  return [
+    "http://localhost:5000",
+    "http://127.0.0.1:5000",
+  ];
+}
+
+const allowedOrigins = getAllowedOrigins();
 
 app.use(
   cors({
@@ -32,6 +40,7 @@ app.use(
       if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
+        logger.warn({ origin, allowedOrigins }, "CORS request from unauthorized origin");
         callback(new Error("Not allowed by CORS"));
       }
     },
@@ -54,33 +63,20 @@ app.use(express.urlencoded({ extended: false }));
 // Request logging middleware (must be after body parsers, before routes)
 app.use(requestLogger);
 
-export function log(message: string, source = "express") {
-  const formattedTime = new Date().toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
-  });
-
-  console.log(`${formattedTime} [${source}] ${message}`);
-}
-
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
-
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
-  };
 
   res.on("finish", () => {
     const duration = Date.now() - start;
     if (path.startsWith("/api")) {
-      const logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      log(logLine);
+      // Use structured logger instead of console.log
+      logger.debug({
+        method: req.method,
+        path,
+        statusCode: res.statusCode,
+        duration,
+      }, "API request completed");
     }
   });
 

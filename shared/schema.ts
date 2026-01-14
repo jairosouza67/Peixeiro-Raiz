@@ -49,6 +49,18 @@ export const insertUserSchema = createInsertSchema(users);
 export const insertSimulationSchema = createInsertSchema(feeding_simulations);
 export const insertSubscriptionSchema = createInsertSchema(subscriptions);
 
+// Validation schema for simulation input
+export const simulationInputSchema = z.object({
+  initialWeight: z.number().min(0.5, "Peso mínimo é 0.5g").max(200000, "Peso máximo é 200kg"),
+  quantity: z.number().int().min(1, "Quantidade mínima é 1").max(2000000, "Quantidade máxima é 2 milhões"),
+  temperature: z.number().min(10, "Temperatura mínima é 10°C").max(40, "Temperatura máxima é 40°C"),
+  feedPrice: z.number().min(0, "Preço não pode ser negativo").max(10000, "Preço máximo é R$ 10.000"),
+  weeks: z.number().int().min(1, "Mínimo de 1 semana").max(52, "Máximo de 52 semanas"),
+  phase: z.string().optional(),
+});
+
+export type SimulationInputValidated = z.infer<typeof simulationInputSchema>;
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;

@@ -7,11 +7,14 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 let supabaseClient: SupabaseClient | null = null;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-    console.error(
-        "[Supabase] URL or Anon Key not found. Please check your .env file.\n" +
-        "Required variables: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY\n" +
-        "Auth and data features will be disabled."
-    );
+    // Only log error in development to avoid exposing config issues in production
+    if (import.meta.env.DEV) {
+        console.error(
+            "[Supabase] URL or Anon Key not found. Please check your .env file.\n" +
+            "Required variables: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY\n" +
+            "Auth and data features will be disabled."
+        );
+    }
 } else {
     try {
         supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
@@ -24,16 +27,11 @@ if (!supabaseUrl || !supabaseAnonKey) {
             },
         });
     } catch (error) {
-        console.error("[Supabase] Failed to initialize client:", error);
+        if (import.meta.env.DEV) {
+            console.error("[Supabase] Failed to initialize client:", error);
+        }
     }
 }
-
-/**
- * Supabase client instance.
- * WARNING: May be null if env vars are missing or initialization failed.
- * Always check before using in critical paths.
- */
-export const supabase = supabaseClient as SupabaseClient;
 
 /**
  * Check if Supabase is properly configured and available
@@ -41,3 +39,24 @@ export const supabase = supabaseClient as SupabaseClient;
 export function isSupabaseConfigured(): boolean {
     return supabaseClient !== null;
 }
+
+/**
+ * Get Supabase client with null safety check.
+ * Throws error if client is not configured - use in critical paths.
+ */
+export function getSupabaseClient(): SupabaseClient {
+    if (!supabaseClient) {
+        throw new Error(
+            "Supabase client not configured. " +
+            "Please check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables."
+        );
+    }
+    return supabaseClient;
+}
+
+/**
+ * Supabase client instance.
+ * For backwards compatibility - prefer using getSupabaseClient() for null safety
+ * or check isSupabaseConfigured() first.
+ */
+export const supabase = supabaseClient as SupabaseClient;

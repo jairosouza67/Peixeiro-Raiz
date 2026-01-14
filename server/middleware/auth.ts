@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { createClient } from "@supabase/supabase-js";
+import { logger } from "../lib/logger";
 
 // Extend Express Request to include user info
 declare global {
@@ -33,9 +34,11 @@ export async function authenticateUser(
     const token = authHeader.substring(7); // Remove "Bearer " prefix
 
     const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
+    // Use dedicated backend env var (not VITE_ prefix which is for frontend)
+    const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseAnonKey) {
+      logger.error("Missing SUPABASE_URL or SUPABASE_ANON_KEY for auth");
       throw new Error("Missing Supabase credentials for auth");
     }
 
@@ -60,7 +63,7 @@ export async function authenticateUser(
 
     next();
   } catch (error) {
-    console.error("Authentication error:", error);
+    logger.error({ error: (error as Error).message }, "Authentication error");
     res.status(500).json({ message: "Authentication failed" });
   }
 }
@@ -86,7 +89,7 @@ export async function optionalAuth(
     const token = authHeader.substring(7);
 
     const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
+    const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseAnonKey) {
       // Missing config, skip auth but allow request
@@ -110,7 +113,7 @@ export async function optionalAuth(
     next();
   } catch (error) {
     // Log but don't block the request
-    console.error("Optional auth error:", error);
+    logger.warn({ error: (error as Error).message }, "Optional auth error");
     next();
   }
 }

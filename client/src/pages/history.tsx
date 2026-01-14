@@ -31,7 +31,9 @@ export default function HistoryPage() {
         .order('date', { ascending: false });
 
       if (error) {
-        console.error("Erro ao carregar histórico:", error);
+        if (import.meta.env.DEV) {
+          console.error("Erro ao carregar histórico:", error.message);
+        }
         toast({
           variant: "destructive",
           title: "Erro ao carregar histórico",
@@ -65,7 +67,9 @@ export default function HistoryPage() {
       setDeletingId(id);
       const { error } = await supabase.from("feeding_simulations").delete().eq("id", id);
       if (error) {
-        console.error("Erro ao deletar simulação:", error);
+        if (import.meta.env.DEV) {
+          console.error("Erro ao deletar simulação:", error.message);
+        }
         toast({ variant: "destructive", title: "Erro ao deletar", description: "Tente novamente." });
         return;
       }
@@ -78,7 +82,9 @@ export default function HistoryPage() {
       }
       toast({ title: "Simulação removida" });
     } catch (err) {
-      console.error(err);
+      if (import.meta.env.DEV) {
+        console.error("Erro inesperado ao deletar:", err);
+      }
       toast({ variant: "destructive", title: "Erro inesperado" });
     } finally {
       setDeletingId(null);

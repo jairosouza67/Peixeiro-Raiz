@@ -90,7 +90,9 @@ export default function CalculatorPage() {
       );
 
       if (!response.ok) {
-        console.error("Erro ao calcular simulação via API:", response.status, await response.text());
+        if (import.meta.env.DEV) {
+          console.error("Erro ao calcular simulação via API:", response.status);
+        }
         toast({
           variant: "destructive",
           title: "Erro ao calcular simulação",
@@ -119,7 +121,9 @@ export default function CalculatorPage() {
             });
 
           if (saveError) {
-            console.error("Erro ao salvar simulação:", saveError);
+            if (import.meta.env.DEV) {
+              console.error("Erro ao salvar simulação:", saveError.message);
+            }
             toast({
               variant: "destructive",
               title: "Erro ao salvar simulação",
@@ -127,7 +131,9 @@ export default function CalculatorPage() {
             });
           }
         } catch (saveError) {
-          console.error("Erro ao salvar simulação:", saveError);
+          if (import.meta.env.DEV) {
+            console.error("Erro ao salvar simulação:", saveError);
+          }
           toast({
             variant: "destructive",
             title: "Erro ao salvar simulação",
@@ -148,7 +154,9 @@ export default function CalculatorPage() {
         }, 100);
       }
     } catch (error) {
-      console.error("Erro inesperado ao calcular simulação:", error);
+      if (import.meta.env.DEV) {
+        console.error("Erro inesperado ao calcular simulação:", error);
+      }
       toast({
         variant: "destructive",
         title: "Erro inesperado",

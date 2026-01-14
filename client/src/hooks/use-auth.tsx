@@ -27,37 +27,30 @@ async function syncUserToDb(user: User) {
             );
 
         if (error) {
-            console.warn("[Auth] Failed to sync user row:", error);
-        }
-
-        // Ensure default subscription row exists (blocked) for paywall logic.
-        // This assumes RLS allows the authenticated user to insert/select their own row.
-        const { data: existingSub, error: subSelectError } = await supabase
-            .from("subscriptions")
-            .select("id")
-            .eq("user_id", user.id)
-            .maybeSingle();
-
-        if (subSelectError) {
-            console.warn("[Auth] Failed to check subscription row:", subSelectError);
-            return;
-        }
-
-        if (!existingSub?.id) {
-            const { error: subInsertError } = await supabase.from("subscriptions").insert({
-                user_id: user.id,
-                status: "blocked",
-                updated_at: new Date().toISOString(),
-            });
-
-            if (subInsertError) {
-                console.warn("[Auth] Failed to create default subscription row:", subInsertError);
+            // Use structured logging - avoid exposing error details in production
+            if (import.meta.env.DEV) {
+                console.warn("[Auth] Failed to sync user row:", error.message);
             }
+        }
+
+        // Use UPSERT to avoid race conditions when multiple devices/tabs login simultaneously
+        const { error: subUpsertError } = await supabase
+            .from("subscriptions")
+            .upsert(
+                {
+                    user_id: user.id,
+                    status: "blocked",
+                    updated_at: new Date().toISOString(),
+                },
+                { onConflict: "user_id", ignoreDuplicates: true }
+            );
+
+        if (subUpsertError && import.meta.env.DEV) {
+            console.warn("[Auth] Failed to upsert subscription row:", subUpsertError.message);
         }
 
         // If the user already bought on Cakto before creating/logging into the app,
         // the webhook stores an entitlement by email. Here we try to "claim" it.
-        // First check if there's an active entitlement for this user's email to avoid unnecessary 403 errors.
         if (email) {
             const { data: entitlement } = await supabase
                 .from("cakto_entitlements")
@@ -74,13 +67,15 @@ async function syncUserToDb(user: User) {
                     .eq("user_id", user.id)
                     .eq("status", "blocked");
 
-                if (claimError) {
-                    console.debug("[Auth] Subscription claim failed:", claimError.message ?? claimError);
+                if (claimError && import.meta.env.DEV) {
+                    console.debug("[Auth] Subscription claim failed:", claimError.message);
                 }
             }
         }
     } catch (error) {
-        console.warn("[Auth] Failed to sync user row:", error);
+        if (import.meta.env.DEV) {
+            console.warn("[Auth] Failed to sync user row:", error);
+        }
     }
 }
 
@@ -91,7 +86,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         // Skip auth if Supabase is not configured
         if (!isSupabaseConfigured()) {
-            console.warn("[Auth] Supabase not configured, auth features disabled");
+            if (import.meta.env.DEV) {
+                console.warn("[Auth] Supabase not configured, auth features disabled");
+            }
             setUser(null);
             setLoading(false);
             return;
@@ -105,7 +102,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
             setLoading(false);
         }).catch((error) => {
-            console.error("[Auth] Failed to get session:", error);
+            if (import.meta.env.DEV) {
+                console.error("[Auth] Failed to get session:", error);
+            }
             setUser(null);
             setLoading(false);
         });
@@ -124,7 +123,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const signOut = async () => {
         if (!isSupabaseConfigured()) {
-            console.warn("[Auth] Cannot sign out, Supabase not configured");
+            if (import.meta.env.DEV) {
+                console.warn("[Auth] Cannot sign out, Supabase not configured");
+            }
             return;
         }
         try {
@@ -132,7 +133,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             await supabase.auth.signOut({ scope: 'local' });
         } catch (error) {
             // Even if the server-side logout fails (403), clear local session
-            console.warn("[Auth] Sign out error (clearing local session anyway):", error);
+            if (import.meta.env.DEV) {
+                console.warn("[Auth] Sign out error (clearing local session anyway):", error);
+            }
         }
         // Always clear local state to ensure UI updates
         setUser(null);

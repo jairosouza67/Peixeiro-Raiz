@@ -1,10 +1,12 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import rateLimit from "express-rate-limit";
-import { storage } from "./storage";
 import { calculateSimulation, ENGINE_VERSION, type SimulationInput } from "@shared/engine";
+import { simulationInputSchema } from "@shared/schema";
 import { saveSimulation, getSimulationsByUser, type SaveSimulationParams } from "./repositories/simulations";
 import { authenticateUser } from "./middleware/auth";
+import { checkUserAccess } from "./middleware/subscription";
+import { logger } from "./lib/logger";
 
 // Rate limiters for different endpoints
 const calculationLimiter = rateLimit({
@@ -37,16 +39,45 @@ export async function registerRoutes(
     });
   });
 
-  // Public route with rate limiting (no auth required)
+  // Access check endpoint (for frontend to verify subscription status)
+  app.get("/api/auth/access", dataLimiter, authenticateUser, async (req, res, next) => {
+    try {
+      const userId = req.user?.id;
+      const email = req.user?.email;
+
+      if (!userId) {
+        res.status(401).json({ access: "blocked", reason: "unauthenticated" });
+        return;
+      }
+
+      const result = await checkUserAccess(userId, email);
+      res.json(result);
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  // Public route with rate limiting and input validation
   app.post("/api/calculate", calculationLimiter, (req, res, next) => {
     try {
-      const input = req.body?.input as SimulationInput | undefined;
+      const rawInput = req.body?.input;
 
-      if (!input) {
+      if (!rawInput) {
         res.status(400).json({ message: "Missing input payload" });
         return;
       }
 
+      // Validate input with Zod
+      const validation = simulationInputSchema.safeParse(rawInput);
+      if (!validation.success) {
+        res.status(400).json({ 
+          message: "Invalid input", 
+          errors: validation.error.issues.map(i => ({ field: i.path.join("."), message: i.message }))
+        });
+        return;
+      }
+
+      const input = validation.data as SimulationInput;
       const result = calculateSimulation(input);
 
       res.json({

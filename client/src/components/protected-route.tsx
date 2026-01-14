@@ -1,22 +1,97 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Redirect, Route } from "wouter";
-import { useEffect, useMemo, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { useEffect, useState } from "react";
+import { fetchWithTimeout } from "@/lib/fetch";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
-// Admin emails with full access (bypass subscription check)
-// Configure via VITE_ADMIN_EMAILS (comma-separated). Fallback kept for safety.
-const DEFAULT_ADMIN_EMAILS = ["jairosouza67@gmail.com"];
+type AccessStatus = "granted" | "blocked" | "loading";
 
-function parseAdminEmailsFromEnv(): string[] {
-    const raw = (import.meta as any)?.env?.VITE_ADMIN_EMAILS as string | undefined;
-    if (!raw || !raw.trim()) return DEFAULT_ADMIN_EMAILS;
-    return raw
-        .split(",")
-        .map((s) => s.trim().toLowerCase())
-        .filter(Boolean);
+interface AccessCheckResult {
+    access: "granted" | "blocked";
+    reason?: string;
 }
 
-type SubscriptionStatus = "active" | "blocked";
+/**
+ * Check user access via backend API
+ * This validates subscription status server-side (more secure than client-side check)
+ */
+async function checkAccessViaBackend(): Promise<AccessCheckResult> {
+    try {
+        if (!isSupabaseConfigured()) {
+            return { access: "blocked", reason: "supabase_not_configured" };
+        }
+
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session?.access_token) {
+            return { access: "blocked", reason: "no_session" };
+        }
+
+        const response = await fetchWithTimeout(
+            "/api/auth/access",
+            {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${session.access_token}`,
+                    "Content-Type": "application/json",
+                },
+            },
+            10000 // 10 second timeout for access check
+        );
+
+        if (!response.ok) {
+            // If backend is unavailable, fallback to client-side check
+            if (response.status >= 500) {
+                return await fallbackClientSideCheck(session.user.id);
+            }
+            return { access: "blocked", reason: "api_error" };
+        }
+
+        const result = await response.json() as AccessCheckResult;
+        return result;
+    } catch (error) {
+        // Network error - try fallback
+        if (import.meta.env.DEV) {
+            console.warn("[ProtectedRoute] Backend access check failed, using fallback:", error);
+        }
+        
+        // Try to get user ID for fallback
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.user?.id) {
+                return await fallbackClientSideCheck(session.user.id);
+            }
+        } catch {
+            // Ignore fallback errors
+        }
+        
+        return { access: "blocked", reason: "network_error" };
+    }
+}
+
+/**
+ * Fallback: client-side subscription check (for when backend is unavailable)
+ */
+async function fallbackClientSideCheck(userId: string): Promise<AccessCheckResult> {
+    try {
+        const { data, error } = await supabase
+            .from("subscriptions")
+            .select("status")
+            .eq("user_id", userId)
+            .maybeSingle();
+
+        if (error || !data) {
+            return { access: "blocked", reason: "no_subscription" };
+        }
+
+        return {
+            access: data.status === "active" ? "granted" : "blocked",
+            reason: data.status === "active" ? "active_subscription" : "blocked_subscription",
+        };
+    } catch {
+        return { access: "blocked", reason: "fallback_error" };
+    }
+}
 
 export function ProtectedRoute({
     path,
@@ -28,70 +103,43 @@ export function ProtectedRoute({
     requireActiveSubscription?: boolean;
 }) {
     const { user, loading } = useAuth();
-    const [subscriptionLoading, setSubscriptionLoading] = useState<boolean>(true);
-    const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null);
-
-    const isAdmin = useMemo(() => {
-        const adminEmails = parseAdminEmailsFromEnv();
-        const email = (user?.email ?? "").toLowerCase();
-        return adminEmails.includes(email);
-    }, [user?.email]);
+    const [accessStatus, setAccessStatus] = useState<AccessStatus>("loading");
 
     useEffect(() => {
         let cancelled = false;
 
-        async function fetchSubscription() {
-            if (!user || !requireActiveSubscription || isAdmin) {
+        async function checkAccess() {
+            if (!user) {
                 if (!cancelled) {
-                    setSubscriptionStatus("active");
-                    setSubscriptionLoading(false);
+                    setAccessStatus("blocked");
                 }
                 return;
             }
 
-            try {
-                setSubscriptionLoading(true);
-
-                const { data, error } = await supabase
-                    .from("subscriptions")
-                    .select("status")
-                    .eq("user_id", user.id)
-                    .maybeSingle();
-
-                if (error) {
-                    console.warn("[Subscription] Failed to load status:", error);
-                    if (!cancelled) {
-                        setSubscriptionStatus("blocked");
-                        setSubscriptionLoading(false);
-                    }
-                    return;
-                }
-
-                // If no row yet, treat as blocked (the Auth hook will ensure default row)
-                const status = (data?.status as SubscriptionStatus | undefined) ?? "blocked";
-
+            if (!requireActiveSubscription) {
                 if (!cancelled) {
-                    setSubscriptionStatus(status);
-                    setSubscriptionLoading(false);
+                    setAccessStatus("granted");
                 }
-            } catch (error) {
-                console.warn("[Subscription] Failed to load status:", error);
-                if (!cancelled) {
-                    setSubscriptionStatus("blocked");
-                    setSubscriptionLoading(false);
-                }
+                return;
+            }
+
+            // Check access via backend (includes admin check server-side)
+            const result = await checkAccessViaBackend();
+
+            if (!cancelled) {
+                setAccessStatus(result.access);
             }
         }
 
         if (loading) return;
-        void fetchSubscription();
+        void checkAccess();
 
         return () => {
             cancelled = true;
         };
-    }, [user, loading, requireActiveSubscription, isAdmin]);
+    }, [user, loading, requireActiveSubscription]);
 
-    if (loading || subscriptionLoading) {
+    if (loading || accessStatus === "loading") {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -103,7 +151,7 @@ export function ProtectedRoute({
         return <Redirect to="/login" />;
     }
 
-    if (requireActiveSubscription && !isAdmin && subscriptionStatus !== "active") {
+    if (requireActiveSubscription && accessStatus !== "granted") {
         return <Redirect to="/" />;
     }
 
