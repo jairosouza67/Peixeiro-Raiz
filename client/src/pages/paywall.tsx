@@ -14,17 +14,13 @@ export default function PaywallPage() {
   const { toast } = useToast();
 
   const [checkingAccess, setCheckingAccess] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<"trimestral" | "anual">("anual");
 
   const handleSubscribe = () => {
-    const checkoutUrlTrimestral = import.meta.env.VITE_CAKTO_CHECKOUT_URL_TRIMESTRAL as string | undefined;
-    const checkoutUrlAnual = import.meta.env.VITE_CAKTO_CHECKOUT_URL_ANUAL as string | undefined;
-
-    const checkoutUrl = selectedPlan === "trimestral" ? checkoutUrlTrimestral : checkoutUrlAnual;
+    const checkoutUrl = import.meta.env.VITE_CAKTO_CHECKOUT_URL_ANUAL as string | undefined;
 
     if (!checkoutUrl) {
       if (import.meta.env.DEV) {
-        console.warn(`[Paywall] Missing VITE_CAKTO_CHECKOUT_URL_${selectedPlan.toUpperCase()}`);
+        console.warn("[Paywall] Missing VITE_CAKTO_CHECKOUT_URL_ANUAL");
       }
       toast({
         variant: "destructive",
@@ -92,12 +88,12 @@ export default function PaywallPage() {
       {/* Layered Background */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
-        <img 
-          src={bgImage} 
-          alt="" 
+        <img
+          src={bgImage}
+          alt=""
           className="w-full h-full object-cover opacity-[0.03] animate-wave"
         />
-        <div 
+        <div
           className="absolute inset-0 opacity-[0.02]"
           style={{
             backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--primary)) 1px, transparent 0)`,
@@ -107,7 +103,7 @@ export default function PaywallPage() {
       </div>
 
       <div className="relative z-10 max-w-5xl w-full grid md:grid-cols-2 gap-12 items-center">
-        
+
         {/* Value Prop */}
         <div className="space-y-6 text-center md:text-left">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary/15 to-primary/5 text-primary text-sm font-medium border border-primary/20 animate-float-up">
@@ -125,7 +121,7 @@ export default function PaywallPage() {
           <p className="text-lg text-muted-foreground leading-relaxed max-w-lg animate-float-up delay-200">
             Ferramenta desenvolvida por engenheiro de pesca para facilitar o manejo de pequenos criadores. Reduza desperdícios, acelere o crescimento das tilápias e aumente seu lucro com alimentação correta.
           </p>
-          
+
           <div className="space-y-4 pt-4 animate-float-up delay-300">
             {[
               "Alimente com precisão",
@@ -149,61 +145,32 @@ export default function PaywallPage() {
             <ShieldCheck className="h-40 w-40 -rotate-12" />
           </div>
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary/80 to-primary/40" />
-          
+
           <CardHeader className="text-center pb-2 pt-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/50 text-accent-foreground text-xs font-medium mx-auto mb-4">
               <span>🔥 Oferta de lançamento</span>
             </div>
-            <CardTitle className="font-heading text-xl uppercase tracking-[0.2em] text-muted-foreground">Escolha seu plano</CardTitle>
-            
-            {/* Assinatura Trimestral */}
-            <button
-              type="button"
-              onClick={() => setSelectedPlan("trimestral")}
-              className={`mt-6 p-4 rounded-lg border w-full text-left transition-all ${
-                selectedPlan === "trimestral"
-                  ? "border-2 border-primary/60 bg-primary/5 ring-2 ring-primary/20"
-                  : "border-border/50 bg-muted/20 hover:border-border hover:bg-muted/30"
-              }`}
-            >
-              <div className="text-sm font-medium text-muted-foreground mb-3 text-center">Assinatura Trimestral</div>
+            <CardTitle className="font-heading text-xl uppercase tracking-[0.2em] text-muted-foreground">Assinatura Anual</CardTitle>
+
+            {/* Preço Anual */}
+            <div className="mt-6 p-4 rounded-lg border-2 border-primary/60 bg-primary/5 ring-2 ring-primary/20 w-full">
               <div className="text-center mb-3">
-                <span className="text-2xl md:text-3xl font-semibold text-foreground">Menos de R$ 0,50/dia</span>
+                <span className="text-3xl md:text-4xl font-bold text-foreground">Menos de R$ 0,13</span>
+                <span className="text-lg text-muted-foreground ml-2">/dia</span>
               </div>
               <div className="pt-3 border-t border-border/30 text-center">
-                <span className="text-sm text-muted-foreground">R$ 37,00</span>
-                <span className="text-xs text-muted-foreground/70 ml-1">por 3 meses</span>
-              </div>
-            </button>
-            
-            {/* Assinatura Anual */}
-            <button
-              type="button"
-              onClick={() => setSelectedPlan("anual")}
-              className={`mt-4 p-4 rounded-lg border w-full text-left transition-all relative ${
-                selectedPlan === "anual"
-                  ? "border-2 border-primary/60 bg-primary/5 ring-2 ring-primary/20"
-                  : "border-border/50 bg-muted/20 hover:border-border hover:bg-muted/30"
-              }`}
-            >
-              <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-primary text-primary-foreground text-xs font-medium rounded">Melhor valor</div>
-              <div className="text-sm font-medium text-muted-foreground mb-3 text-center">Assinatura Anual</div>
-              <div className="text-center mb-3">
-                <span className="text-2xl md:text-3xl font-semibold text-foreground">Menos de R$ 0,30/dia</span>
-              </div>
-              <div className="pt-3 border-t border-border/30 text-center">
-                <span className="text-sm text-muted-foreground">R$ 97,00</span>
+                <span className="text-sm text-muted-foreground">R$ 47,00</span>
                 <span className="text-xs text-muted-foreground/70 ml-1">por 12 meses</span>
               </div>
-            </button>
-            
+            </div>
+
             <CardDescription className="mt-4 text-xs bg-muted/50 rounded-lg px-3 py-2 inline-block">Use o mesmo e-mail do login no checkout</CardDescription>
           </CardHeader>
 
           <CardContent className="pt-6 pb-8">
-            <Button 
-              size="lg" 
-              className="w-full text-lg h-14 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 transition-all duration-300 group" 
+            <Button
+              size="lg"
+              className="w-full text-lg h-14 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 transition-all duration-300 group"
               onClick={handleSubscribe}
             >
               Assinar Agora
@@ -226,7 +193,7 @@ export default function PaywallPage() {
               <ShieldCheck className="h-3.5 w-3.5" />
               Pagamento seguro via Cakto
             </p>
-            
+
             <div className="mt-6 pt-6 border-t border-border/50 text-center">
               {user ? (
                 <div className="space-y-3">
