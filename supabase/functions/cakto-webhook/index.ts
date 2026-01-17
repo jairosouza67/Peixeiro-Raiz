@@ -36,15 +36,15 @@ function mapEventToStatus(event: string): SubscriptionStatus | null {
  */
 function isTimestampValid(timestamp: unknown): boolean {
   if (!timestamp) return true; // If no timestamp provided, skip validation (backwards compat)
-  
-  const ts = typeof timestamp === 'string' ? new Date(timestamp).getTime() : 
-             typeof timestamp === 'number' ? timestamp : null;
-  
+
+  const ts = typeof timestamp === 'string' ? new Date(timestamp).getTime() :
+    typeof timestamp === 'number' ? timestamp : null;
+
   if (!ts || isNaN(ts)) return true; // Invalid timestamp format, skip validation
-  
+
   const now = Date.now();
   const fiveMinutes = 5 * 60 * 1000;
-  
+
   return Math.abs(now - ts) <= fiveMinutes;
 }
 
@@ -83,10 +83,10 @@ serve(async (req) => {
     }
 
     // Validate timestamp to prevent replay attacks
-    const timestamp = (payload as any)?.timestamp ?? 
-                      (payload as any)?.created_at ?? 
-                      (payload as any)?.data?.timestamp;
-    
+    const timestamp = (payload as any)?.timestamp ??
+      (payload as any)?.created_at ??
+      (payload as any)?.data?.timestamp;
+
     if (!isTimestampValid(timestamp)) {
       return jsonResponse(400, { error: "Webhook timestamp expired or invalid" }, origin);
     }
@@ -165,6 +165,7 @@ serve(async (req) => {
       {
         user_id: userRow.id,
         status,
+        email: normalizedEmail,
         updated_at: new Date().toISOString(),
       },
       { onConflict: "user_id" }

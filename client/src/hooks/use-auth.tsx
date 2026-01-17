@@ -40,6 +40,7 @@ async function syncUserToDb(user: User) {
                 {
                     user_id: user.id,
                     status: "blocked",
+                    email: email,
                     updated_at: new Date().toISOString(),
                 },
                 { onConflict: "user_id", ignoreDuplicates: true }
