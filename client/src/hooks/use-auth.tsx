@@ -33,22 +33,24 @@ async function syncUserToDb(user: User) {
             }
         }
 
-        // Use UPSERT to avoid race conditions when multiple devices/tabs login simultaneously
-        const { error: subUpsertError } = await supabase
+        // Try to create initial subscription (blocked status)
+        // If subscription already exists, this will fail silently due to RLS policies
+        // The RLS policy only allows INSERT with status='blocked', so existing active subscriptions are safe
+        await supabase
             .from("subscriptions")
-            .upsert(
+            .insert(
                 {
                     user_id: user.id,
                     status: "blocked",
                     email: email,
                     updated_at: new Date().toISOString(),
                 },
-                { onConflict: "user_id", ignoreDuplicates: true }
+                { ignoreDuplicates: true }
             );
 
-        if (subUpsertError && import.meta.env.DEV) {
-            console.warn("[Auth] Failed to upsert subscription row:", subUpsertError.message);
-        }
+        // Note: We intentionally ignore errors here because:
+        // 1. If subscription doesn't exist, it will be created with blocked status
+        // 2. If subscription exists, insert fails but that's OK - we check entitlements next
 
         // If the user already bought on Cakto before creating/logging into the app,
         // the webhook stores an entitlement by email. Here we try to "claim" it.
@@ -62,9 +64,12 @@ async function syncUserToDb(user: User) {
 
             // Only attempt to claim if there's an active entitlement
             if (entitlement?.status === "active") {
+                // Try to update subscription to active
+                // This will succeed if subscription is currently blocked
+                // If subscription is already active, this update will match 0 rows (which is fine)
                 const { error: claimError } = await supabase
                     .from("subscriptions")
-                    .update({ status: "active" })
+                    .update({ status: "active", updated_at: new Date().toISOString() })
                     .eq("user_id", user.id)
                     .eq("status", "blocked");
 
