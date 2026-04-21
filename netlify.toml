@@ -2,6 +2,13 @@
   command = "npm run build"
   publish = "dist/public"
 
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+[functions."supabase-keepalive"]
+  schedule = "0 3 */4 * *"
+
 # Redirect all routes to index.html for SPA routing (wouter/React Router)
 [[redirects]]
   from = "/*"
@@ -12,7 +19,10 @@
 # VITE_SUPABASE_URL
 # VITE_SUPABASE_ANON_KEY
 # VITE_CAKTO_CHECKOUT_URL
+# SUPABASE_URL
+# SUPABASE_SERVICE_ROLE_KEY
 
 # Note:
-# - SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY / CAKTO_WEBHOOK_SECRET devem ficar no Supabase (Edge Function secrets),
-#   não no Netlify (para evitar exposição/uso indevido).
+# - Variáveis com prefixo VITE_ ficam expostas no frontend.
+# - SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY podem ser usadas no runtime de Functions do Netlify,
+#   sem prefixo VITE_, para manter segredos no backend.

@@ -102,10 +102,11 @@ O schema de referência está em `shared/schema.ts`.
 
 ## Keepalive Supabase (cron)
 
-- O arquivo `render.yaml` define um cron `supabase-keepalive` com agenda `0 3 */4 * *` (UTC), executando a cada 4 dias.
-- O job executa `npm run cron:supabase-keepalive`, que roda um `SELECT` com `limit(1)` em `feeding_simulations`.
+- O arquivo `netlify.toml` define a agenda da função `supabase-keepalive` em `0 3 */4 * *` (UTC), executando a cada 4 dias.
+- A função agendada está em `netlify/functions/supabase-keepalive.ts` e faz um `GET` de leitura no endpoint REST do Supabase.
 - A consulta é somente leitura e não altera dados.
-- Variáveis necessárias no serviço cron do Render:
+
+- Variáveis necessárias no Netlify (Site configuration > Environment variables):
 	- `SUPABASE_URL`
 	- `SUPABASE_SERVICE_ROLE_KEY`
 
