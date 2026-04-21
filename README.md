@@ -24,6 +24,7 @@ Web App (com PWA) para simular manejo alimentar e projeção de crescimento de t
 - `npm run start` → roda build de produção
 - `npm run test` / `npm run test:run` → testes (Vitest)
 - `npm run check` → TypeScript (tsc)
+- `npm run cron:supabase-keepalive` → ping somente leitura no Supabase (manutenção)
 
 ## Como rodar localmente
 
@@ -98,6 +99,15 @@ O schema de referência está em `shared/schema.ts`.
 
 - Requisitos atuais: `docs/Requirement.md`
 - Lógica técnica: `docs/LOGICA_CALCULO_TECNICO.md`
+
+## Keepalive Supabase (cron)
+
+- O arquivo `render.yaml` define um cron `supabase-keepalive` com agenda `0 3 */4 * *` (UTC), executando a cada 4 dias.
+- O job executa `npm run cron:supabase-keepalive`, que roda um `SELECT` com `limit(1)` em `feeding_simulations`.
+- A consulta é somente leitura e não altera dados.
+- Variáveis necessárias no serviço cron do Render:
+	- `SUPABASE_URL`
+	- `SUPABASE_SERVICE_ROLE_KEY`
 
 ## Próximos passos sugeridos
 
