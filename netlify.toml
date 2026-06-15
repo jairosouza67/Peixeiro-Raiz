@@ -7,7 +7,13 @@
   node_bundler = "esbuild"
 
 [functions."supabase-keepalive"]
-  schedule = "0 3 */4 * *"
+  schedule = "0 */6 * * *"
+
+# Exclude Netlify Functions from SPA redirect (critical for cron/scheduled functions)
+[[redirects]]
+  from = "/.netlify/functions/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
 
 # Redirect all routes to index.html for SPA routing (wouter/React Router)
 [[redirects]]
