@@ -36,7 +36,7 @@ async function keepalive() {
   console.log(`🏓 [${new Date().toISOString()}] Executando keepalive...`);
 
   // ⚠️ Tabela existente no banco
-  const TABELA = 'perfis_usuario';
+  const TABELA = 'feeding_simulations';
 
   try {
     const response = await fetch(
